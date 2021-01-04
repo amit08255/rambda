@@ -4,17 +4,17 @@ const list = [{a: {b: '1'}}, {a: {c: '2'}}, {a: {b: '3'}}]
 
 describe('indexBy', () => {
   it('happy', () => {
-    const result = indexBy<any>(x => x.a.b, list)
-    const resultCurried = indexBy<any>(x => x.a.b)(list)
-    result // $ExpectType { [key: string]: any; }
-    resultCurried // $ExpectType { [key: string]: any; }
+    const result = indexBy(x => x.a.b, list)
+    const curriedResult = indexBy<any>(x => x.a.b)(list)
+    result.foo?.a.b // $ExpectType string | undefined
+    curriedResult // $ExpectType { readonly [x: string]: any; }
   })
 
   it('with string', () => {
-    const result = indexBy<any>('a.b', list)
-    const resultCurried = indexBy<any>('a.b')(list)
-    result // $ExpectType { [key: string]: any; }
-    resultCurried // $ExpectType { [key: string]: any; }
+    const result = indexBy('a.b', list)
+    const curriedResult = indexBy<any>('a.b')(list)
+    result.foo?.a.b // $ExpectType string | undefined
+    curriedResult // $ExpectType { readonly [key: string]: any; }
   })
 
   it('with interface', () => {
@@ -26,11 +26,11 @@ describe('indexBy', () => {
       x.a // $ExpectType string
       return x.a
     }, interfaceList)
-    const resultCurried = indexBy<Foo>(x => {
+    const curriedResult = indexBy<Foo>(x => {
       x.a // $ExpectType string
       return x.a
     })(interfaceList)
-    result // $ExpectType { [key: string]: Foo; }
-    resultCurried // $ExpectType { [key: string]: Foo; }
+    result // $ExpectType { readonly [x: string]: Foo; }
+    curriedResult // $ExpectType { readonly [x: string]: Foo; }
   })
 })

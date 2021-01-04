@@ -1,0 +1,410 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`brute force Function | Null | Null 1`] = `
+Object {
+  "error": "PENDING",
+  "inputs": Array [
+    [Function],
+    null,
+    null,
+  ],
+  "label": "Rambda should throw",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'apply' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": null,
+}
+`;
+
+exports[`brute force Function | Null | Null 2`] = `
+Object {
+  "error": "PENDING",
+  "inputs": Array [
+    [Function],
+    null,
+    null,
+  ],
+  "label": "Rambda should throw",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'apply' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": null,
+}
+`;
+
+exports[`brute force Function | Null | Null 3`] = `
+Object {
+  "error": "PENDING",
+  "inputs": Array [
+    [Function],
+    null,
+    null,
+  ],
+  "label": "Rambda should throw",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'apply' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": null,
+}
+`;
+
+exports[`brute force Function | Null | Object 1`] = `
+Object {
+  "error": "PENDING",
+  "inputs": Array [
+    [Function],
+    null,
+    Object {},
+  ],
+  "label": "Rambda should throw",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'apply' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": null,
+}
+`;
+
+exports[`brute force Function | Null | Object 2`] = `
+Object {
+  "error": "PENDING",
+  "inputs": Array [
+    [Function],
+    null,
+    Object {},
+  ],
+  "label": "Rambda should throw",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'apply' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": null,
+}
+`;
+
+exports[`brute force Function | Null | Object 3`] = `
+Object {
+  "error": "PENDING",
+  "inputs": Array [
+    [Function],
+    null,
+    Object {
+      "foo": 1,
+    },
+  ],
+  "label": "Rambda should throw",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'apply' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": null,
+}
+`;
+
+exports[`brute force Function | Null | Object 4`] = `
+Object {
+  "error": "PENDING",
+  "inputs": Array [
+    [Function],
+    null,
+    Object {
+      "foo": 1,
+    },
+  ],
+  "label": "Rambda should throw",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'apply' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": null,
+}
+`;
+
+exports[`brute force Null | Function | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    null,
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Null 2`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    null,
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Null 3`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    null,
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Object 1`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    Object {},
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Object 2`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    Object {},
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Object 3`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    Object {},
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Object 4`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    Object {
+      "foo": 1,
+    },
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Object 5`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    Object {
+      "foo": 1,
+    },
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Function | Object 6`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    [Function],
+    Object {
+      "foo": 1,
+    },
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Null | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    null,
+    null,
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Null | Object 1`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    null,
+    Object {},
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Null | Object 2`] = `
+Object {
+  "error": Object {
+    "message": "R.tryCatch | fn 'null'",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    null,
+    Object {
+      "foo": 1,
+    },
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'length' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;

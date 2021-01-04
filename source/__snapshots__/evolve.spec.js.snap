@@ -1,0 +1,1091 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`brute force Array | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [],
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Null 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      1,
+    ],
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Null 3`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      [Function],
+    ],
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Number 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [],
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Number 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      1,
+    ],
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Number 3`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      [Function],
+    ],
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Object 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [],
+    Object {
+      "a": 1,
+    },
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {
+    "a": 1,
+  },
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Object 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      1,
+    ],
+    Object {
+      "a": 1,
+    },
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {
+    "a": 1,
+  },
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Object 3`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      [Function],
+    ],
+    Object {
+      "a": 1,
+    },
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {
+    "a": 1,
+  },
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | String 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [],
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | String 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      1,
+    ],
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | String 3`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      [Function],
+    ],
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Undefined 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [],
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Undefined 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      1,
+    ],
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Array | Undefined 3`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Array [
+      [Function],
+    ],
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Array 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    Array [],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Array 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    Array [
+      1,
+    ],
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property '0' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "'iterable' and 'rules' are from wrong type Null",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Number 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Object 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    Object {
+      "a": 1,
+    },
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'a' of null",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | String 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Null | Undefined 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    null,
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Number | Array 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    42,
+    Array [],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Number | Array 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    42,
+    Array [
+      1,
+    ],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [
+    1,
+  ],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Number | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    42,
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Number | Number 1`] = `
+Object {
+  "error": Object {
+    "message": "'iterable' and 'rules' are from wrong type Number",
+    "type": "Error",
+  },
+  "inputs": Array [
+    42,
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Number | Object 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    42,
+    Object {
+      "a": 1,
+    },
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {
+    "a": 1,
+  },
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Number | String 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    42,
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Number | Undefined 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    42,
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Array 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": 1,
+    },
+    Array [],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Array 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": [Function],
+    },
+    Array [],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Array 3`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": 1,
+    },
+    Array [
+      1,
+    ],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [
+    1,
+  ],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Array 4`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": [Function],
+    },
+    Array [
+      1,
+    ],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [
+    1,
+  ],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": 1,
+    },
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Null 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": [Function],
+    },
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Number 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": 1,
+    },
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Number 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": [Function],
+    },
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | String 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": 1,
+    },
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | String 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": [Function],
+    },
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Undefined 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": 1,
+    },
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Object | Undefined 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    Object {
+      "a": [Function],
+    },
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force String | Array 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    "",
+    Array [],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force String | Array 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    "",
+    Array [
+      1,
+    ],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [
+    1,
+  ],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force String | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    "",
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force String | Number 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    "",
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force String | Object 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    "",
+    Object {
+      "a": 1,
+    },
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {
+    "a": 1,
+  },
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force String | String 1`] = `
+Object {
+  "error": Object {
+    "message": "'iterable' and 'rules' are from wrong type String",
+    "type": "Error",
+  },
+  "inputs": Array [
+    "",
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force String | Undefined 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    "",
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Undefined | Array 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    undefined,
+    Array [],
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Array [],
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Undefined | Array 2`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    undefined,
+    Array [
+      1,
+    ],
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property '0' of undefined",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Undefined | Null 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    undefined,
+    null,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Undefined | Number 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    undefined,
+    42,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Undefined | Object 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    undefined,
+    Object {
+      "a": 1,
+    },
+  ],
+  "label": "errors types are different",
+  "ok": false,
+  "ramdaError": Object {
+    "message": "Cannot read property 'a' of undefined",
+    "type": "TypeError",
+  },
+  "ramdaResult": "PENDING",
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Undefined | String 1`] = `
+Object {
+  "error": Object {
+    "message": "iterableType !== rulesType",
+    "type": "Error",
+  },
+  "inputs": Array [
+    undefined,
+    "",
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;
+
+exports[`brute force Undefined | Undefined 1`] = `
+Object {
+  "error": Object {
+    "message": "'iterable' and 'rules' are from wrong type Undefined",
+    "type": "Error",
+  },
+  "inputs": Array [
+    undefined,
+    undefined,
+  ],
+  "label": "Rambda should not throw",
+  "ok": false,
+  "ramdaError": "PENDING",
+  "ramdaResult": Object {},
+  "result": "PENDING",
+}
+`;

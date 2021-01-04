@@ -1,51 +1,15 @@
-import {lens, lensIndex, lensPath, lensProp, view} from 'rambda'
-import {assoc} from 'ramda'
+import {lens, assoc} from 'rambda'
 
-interface Dictionary<T> {
-  [index: string]: T,
-}
 interface Input {
-  name: string,
-  address: string[],
-  pets: Dictionary<string>,
+  foo: string,
 }
 
-const MockObject: Input = {
-  name: 'Alice Jones',
-  address: ['22 Walnut St', 'San Francisco', 'CA'],
-  pets: {dog: 'joker', cat: 'batman'},
-}
-
-const nameLens = lens<Input, string, string>((x: Input) => {
-  return x.name
-}, assoc('name'))
-const addressLens = lensProp('address')
-const headLens = lensIndex(0)
-const dogLens = lensPath(['pets', 'dog'])
-const dogLensAsString = lensPath('pets.doc')
-
-describe('lenses', () => {
-  it('lens', () => {
-    const result = view<Input, string>(nameLens, MockObject)
-    result // $ExpectType string
-  })
-  it('lens path', () => {
-    const result = view<Input, string>(dogLens, MockObject)
-    result // $ExpectType string
-  })
-  it('lens path as string', () => {
-    const result = view<Input, string>(dogLensAsString, MockObject)
-    result // $ExpectType string
-  })
-  it('lens prop', () => {
-    const result = view<Input, string>(addressLens, MockObject)
-    result // $ExpectType string
-  })
-  it('lens index', () => {
-    const result = view<Input['address'], string>(
-      headLens,
-      MockObject.address
-    )
-    result // $ExpectType string
+describe('R.lens', () => {
+  it('happy', () => {
+    const fn = lens<Input, string, string>((x: Input) => {
+      x.foo // $ExpectType string
+      return x.foo
+    }, assoc('name'))
+    fn // $ExpectType Lens
   })
 })

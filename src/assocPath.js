@@ -4,9 +4,12 @@ import { assoc } from './assoc'
 import { curry } from './curry'
 
 function assocPathFn(
-  list, newValue, input
+  path, newValue, input
 ){
-  const pathArrValue = typeof list === 'string' ? list.split('.') : list
+  const pathArrValue =
+    typeof path === 'string' ?
+      path.split('.').map(x => _isInteger(Number(x)) ? Number(x) : x) :
+      path
   if (pathArrValue.length === 0){
     return newValue
   }
@@ -19,10 +22,11 @@ function assocPathFn(
       !input.hasOwnProperty(index)
 
     const nextinput = condition ?
-      _isInteger(parseInt(pathArrValue[ 1 ], 10)) ?
+      _isInteger(pathArrValue[ 1 ]) ?
         [] :
         {} :
       input[ index ]
+
     newValue = assocPathFn(
       Array.prototype.slice.call(pathArrValue, 1),
       newValue,
@@ -30,7 +34,7 @@ function assocPathFn(
     )
   }
 
-  if (_isInteger(parseInt(index, 10)) && _isArray(input)){
+  if (_isInteger(index) && _isArray(input)){
     const arr = input.slice()
     arr[ index ] = newValue
 

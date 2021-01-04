@@ -1,5 +1,11 @@
 # Contribution guidelines
 
+You need to have the code of `selfrefactor/rambda-scripts` repo on the same level as `selfrefactor/rambda` as that repo contains all of the build logic.
+
+`git clone https://github.com/selfrefactor/rambda-scripts.git`
+
+> Final step for any code change is `yarn out` as it generates the output files.
+
 ## Fix a method
 
 1. If the error is in `R.foo` then you need to write a test in `source/foo.spec.js`, that reproduces the bug.
@@ -14,15 +20,27 @@
 
 ## Fix a Typescript definition
 
-Please be aware, that due to [variadic arguments Typescript proposal](https://github.com/microsoft/TypeScript/issues/5453) being still open and unresolved, using **R.compose/R.pipe** is far from smooth. The issue has been [previously discussed](https://github.com/selfrefactor/rambda/issues/466) but there is no visible solution to it.
+1. You may add a new test to `source/foo-spec.ts` to reproduce the bug.
 
-1. If there is already `source/foo-spec.ts` then add a new test to reproduce the bug(otherwise you need to create such file).
+2. Apply your fix to `files/index.d.ts`.
 
-2. Apply your fix to `files/index.d.ts`
+3. Run `yarn typings` to confirm your fix.
 
-3. Run `yarn typings` to confirm your fix
+> It is known that definitions of **R.compose/R.pipe** are far from perfect. The issue has been [previously discussed](https://github.com/selfrefactor/rambda/issues/466) but there is no obvious solution to it.
 
-## Add new `Ramda` method
+## Add new `Rambda` method using helper
+
+There is a helper script to assist you, when creating a new method in Rambda/Rambdax.
+
+1. Run `yarn new NEW_METHOD_NAME`, e.g. `yarn new zip.with` or `yarn new zipWith`.
+
+2. Edit `source/NEW_METHOD_NAME.js`
+
+3. Edit `source/NEW_METHOD_NAME.spec.js`
+
+4. Edit `source/NEW_METHOD_NAME-spec.ts`
+
+## Add new method manually
 
 The new method should have exact or very close implementation compared to the corresponding `Ramda` method.
 
@@ -118,12 +136,12 @@ Note the consistency of `fn` and `input` throughout the example, the actual meth
 
 ### Currying
 
- Any method, which takes more than one argument, should be curried.
+Any method, which takes more than one argument, should be curried.
 
-We can use the standard curring used throughout `Rambda`.
+We can use the standard currying used throughout `Rambda`.
 ```
 export function foo(x, y){
-  if(arguments.length === 1)return _y => foo(x, _y)
+  if(arguments.length === 1) return _y => foo(x, _y)
 
   return x(y)
 }
@@ -139,15 +157,3 @@ function fooFn(x,y){
 }
 export const foo = curry(fooFn)
 ```
-
-### Add a benchmark(very optional)
-
-1. Create file `source/benchmarks/foo.js`
-
-2. Uncomment and edit `// await runSingleBenchmark('foo')` line in `scripts/all-scripts/all-scripts.spec.js`
-
-3. Run `yarn build`(because benchmark run against the builded file)
-
-### Final step
-
-Run `yarn out` and commit

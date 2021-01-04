@@ -1,43 +1,35 @@
-import {produce, delay} from 'rambda'
-
-interface Output {
-  foo: number,
-  bar: number,
-}
+import {produce, pipe, add} from 'rambda'
 
 describe('R.produce', () => {
-  it('rules contains asynchronous function', async() => {
-    const rules = {
-      foo: async(x: number) => {
-        await delay(100)
-        return x + 10
+  it('happy', () => {
+    const result = produce(
+      {
+        a: pipe(add(2), add(3)),
+        b: x => {
+          x // $ExpectType number
+          return {foo: x}
+        },
       },
-      bar: (x: number) => {
-        return x + 20
-      },
-    }
+      1
+    )
 
-    const result = await produce<number, Promise<Output>>(rules, 10)
-    const curriedResult = await produce<number, Promise<Output>>(rules)(10)
-
-    result // $ExpectType Output
-    curriedResult // $ExpectType Output
+    result.a // $ExpectType number
+    result.b.foo // $ExpectType number
   })
-
-  it('rules contains only synchronous functions', () => {
-    const rules = {
-      foo: (x: number) => {
-        return x + 10
-      },
-      bar: (x: number) => {
-        return x + 20
-      },
+  it('curried require explicit types', () => {
+    interface Output {
+      a: number,
+      b: {foo: number},
     }
+    const result = produce<number, Output>({
+      a: pipe(add(2), add(3)),
+      b: x => {
+        x // $ExpectType number
+        return {foo: x}
+      },
+    })(1)
 
-    const result = produce<number, Output>(rules, 10)
-    const curriedResult = produce<number, Output>(rules)(10)
-
-    result // $ExpectType Output
-    curriedResult // $ExpectType Output
+    result.a // $ExpectType number
+    result.b.foo // $ExpectType number
   })
 })

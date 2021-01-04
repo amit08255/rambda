@@ -9,20 +9,14 @@ describe('R.filter with array', () => {
       x // $ExpectType number
       return x > 1
     }, list)
-    result // $ExpectType number[]
+    result // $ExpectType readonly number[]
   })
   it('curried', () => {
     const result = filter<number>(x => {
       x // $ExpectType number
       return x > 1
     })(list)
-    result // $ExpectType number[]
-  })
-  it('pass index as second argument', () => {
-    filter<number>((x, index) => {
-      index // $ExpectType number
-      return x > 1
-    }, list)
+    result // $ExpectType readonly number[]
   })
 })
 

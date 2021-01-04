@@ -1,20 +1,18 @@
 import { F as FunctionToolbelt, O as ObjectToolbelt, L as ListToolbelt } from "../_ts-toolbelt/src/ts-toolbelt";
 
-type RambdaTypes = "Object" | "Number" | "Boolean" | "String" | "Null" | "Array" | "RegExp" | "NaN" | "Function" | "Undefined" | "Async" | "Promise";
-
-type FilterFunctionArray<T> = (x: T, index: number) => boolean;
-type FilterFunctionObject<T> = (x: T, prop: string, inputObj: Dictionary<T>) => boolean;
-type MapFunctionObject<T, U> = (x: T, prop: string, inputObj: Dictionary<T>) => U;
-type MapFunctionArray<T, U> = (x: T, index: number) => U;
-
-type SimplePredicate<T> = (x: T) => boolean;
+type RambdaTypes = "Object" | "Number" | "Boolean" | "String" | "Null" | "Array" | "RegExp" | "NaN" | "Function" | "Undefined" | "Async" | "Promise" | "Symbol";
 
 type CommonKeys<T1, T2> = keyof T1 & keyof T2;
 
+type IndexedIterator<T, U> = (x: T, i: number) => U;
+type Iterator<T, U> = (x: T) => U;
+type ObjectIterator<T, U> = (x: T, prop: string, inputObj: Dictionary<T>) => U;
 type Ord = number | string | boolean | Date;
-
-type Path = string | ReadonlyArray<(number | string)>;
-type RamdaPath = (number | string)[];
+type Path = string | readonly (number | string)[];
+type Predicate<T> = (x: T) => boolean;
+type IndexedPredicate<T> = (x: T, i: number) => boolean;
+type ObjectPredicate<T> = (x: T, prop: string, inputObj: Dictionary<T>) => boolean;
+type RamdaPath = readonly (number | string)[];
 
 type ValueOfRecord<R> =
   R extends Record<any, infer T>
@@ -22,95 +20,113 @@ type ValueOfRecord<R> =
   : never;
 
 interface KeyValuePair<K, V> extends Array<K | V> {
-  0: K;
-  1: V;
+  readonly 0: K;
+  readonly 1: V;
 }
+
 interface Lens {
   <T, U>(obj: T): U;
   set<T, U>(str: string, obj: T): U;
 }
-type Arity1Fn = (a: any) => any;
 
-type Arity2Fn = (a: any, b: any) => any;
+type Arity1Fn = (x: any) => any;
+type Arity2Fn = (x: any, y: any) => any;
 
-type Pred = (...a: any[]) => boolean;
-type Predicate<T> = (input: T) => boolean;
-type SafePred<T> = (...a: T[]) => boolean;
+type Pred = (...x: readonly any[]) => boolean;
+type SafePred<T> = (...x: readonly T[]) => boolean;
 
-interface Dictionary<T> {
-  [index: string]: T;
+export interface Dictionary<T> {readonly [index: string]: T}
+type Partial<T> = { readonly [P in keyof T]?: T[P]};
+
+type Evolvable<E extends Evolver> = { readonly
+  [P in keyof E]?: Evolved<E[P]>;
+};
+
+type Evolver<T extends Evolvable<any> = any> = { readonly
+  [key in keyof Partial<T>]: ((value: T[key]) => T[key]) | (T[key] extends Evolvable<any> ? Evolver<T[key]> : never);
+};
+
+type Evolve<O extends Evolvable<E>, E extends Evolver> = { readonly
+  [P in keyof O]: P extends keyof E
+                  ? EvolveValue<O[P], E[P]>
+                  : O[P];
+};
+
+type Evolved<A> =
+    A extends (value: infer V) => any
+    ? V
+    : A extends Evolver
+      ? Evolvable<A>
+      : never;
+
+type EvolveNestedValue<O, E extends Evolver> =
+    O extends object
+    ? O extends Evolvable<E>
+      ? Evolve<O, E>
+      : never
+    : never;
+
+type EvolveValue<V, E> =
+    E extends (value: V) => any
+    ? ReturnType<E>
+    : E extends Evolver
+      ? EvolveNestedValue<V, E>
+      : never;
+
+type Merge<O1 extends object, O2 extends object, Depth extends 'flat' | 'deep'> =  ObjectToolbelt.Merge<ListToolbelt.ObjectOf<O1>, ListToolbelt.ObjectOf<O2>, Depth, 1>;
+
+interface AssocPartialOne<K extends keyof any> {
+  <T>(val: T): <U>(obj: U) => Record<K, T> & U;
+  <T, U>(val: T, obj: U): Record<K, T> & U;
 }
-
-type Merge<O1 extends object, O2 extends object, Depth extends 'flat' | 'deep'> = ObjectToolbelt.MergeUp<ListToolbelt.ObjectOf<O1>, ListToolbelt.ObjectOf<O2>, Depth, 1>;
 
 // RAMBDAX INTERFACES
 // ============================================
 type Func<T> = (input: any) => T;
 type VoidInputFunc<T> = () => T;
-type Predicatex<T> = (input: T, index: number) => boolean;
 type Fn<In, Out> = (x: In) => Out;
-type FnTwo<In, Out> = (x: In, y: In) => Out;
-type MapFn<In, Out> = (x: In, index: number) => Out;
-
-type FilterFunction<T> = (x: T, prop?: string, inputObj?: object) => boolean;
-type PartitionPredicate<T> = (x: T, prop?: string) => boolean;
-type MapFunction<In, Out> = (x: In, prop?: string, inputObj?: object) => Out;
 type SortObjectPredicate<T> = (aProp: string, bProp: string, aValue: T, bValue: T) => number;
-
-interface MapInterface<T> {
-  (list: T[]): T[];
-  (obj: Dictionary<T>): Dictionary<T>;
-}
-
-interface HeadObject<T> {
-  prop: string;
-  value: T;
-}
 
 type IdentityFunction<T> = (x: T) => T;
 
 interface Filter<T> {
-  (list: T[]): T[];
+  (list: readonly T[]): readonly T[];
   (obj: Dictionary<T>): Dictionary<T>;
 }
 
 type ArgumentTypes<T> = T extends (...args: infer U) => infer R ? U : never;
-
 type isfn<T> = (x: any, y: any) => T;
 
 interface Switchem<T> {
-  is: isfn<Switchem<T>>;
-  default: IdentityFunction<T>;
-}
-
-interface Reduced {
-  [index: number]: any;
-  [index: string]: any;
+  readonly is: isfn<Switchem<T>>;
+  readonly default: IdentityFunction<T>;
 }
 
 interface Schema {
-  [key: string]: any;
+  readonly [key: string]: any;
 }
+
 interface SchemaAsync {
-  [key: string]: Promise<boolean>;
+  readonly [key: string]: Promise<boolean>;
 }
 
 interface IsValid {
-  input: object;
-  schema: Schema;
+  readonly input: object;
+  readonly schema: Schema;
 }
 
 interface IsValidAsync {
-  input: object;
-  schema: Schema | SchemaAsync;
+  readonly input: object;
+  readonly schema: Schema | SchemaAsync;
 }
 
-
-type ProduceRules<Input> = {
-  [key: string]: ProduceFunctionRule<Input> | ProduceAsyncRule<Input>
-}
-type ProduceFunctionRule<Input> = (input: Input) => any
-type ProduceAsyncRule<Input> = (input: Input) => Promise<any>
+type ProduceRules<Output,K extends keyof Output, Input> = { readonly
+  [P in K]: (input: Input) => Output[P];
+};
+type ProduceAsyncRules<Output,K extends keyof Output, Input> = { readonly
+  [P in K]: (input: Input) => Promise<Output[P]>;
+};
+type ProduceAsyncRule<Input> = (input: Input) => Promise<any>;
 type Async<T> = (x: any) => Promise<T>;
 type AsyncIterable<T, K> = (x: T) => Promise<K>;
 type AsyncIterableIndexed<T, K> = (x: T, i: number) => Promise<K>;
@@ -118,7 +134,10 @@ type AsyncPredicate<T> = (x: T) => Promise<boolean>;
 type AsyncPredicateIndexed<T> = (x: T, i: number) => Promise<boolean>;
 type AsyncWithProp<T> = (x: any, prop?: string) => Promise<T>;
 
-export const DELAY: 'RAMBDAX_DELAY'
+type ApplyDiffUpdate = {readonly op:'update', readonly path: string, readonly value: any};
+type ApplyDiffAdd = {readonly op:'add', readonly path: string, readonly value: any};
+type ApplyDiffRemove = {readonly op:'remove', readonly path: string};
+type ApplyDiffRule = ApplyDiffUpdate | ApplyDiffAdd | ApplyDiffRemove;
 
 // API_MARKER
 
@@ -167,8 +186,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function adjust<T>(index: number, replaceFn: (x: T) => T, list: ReadonlyArray<T>): T[];
-export function adjust<T>(index: number, replaceFn: (x: T) => T): (list: ReadonlyArray<T>) => T[];
+export function adjust<T>(index: number, replaceFn: (x: T) => T, list: readonly T[]): readonly T[];
+export function adjust<T>(index: number, replaceFn: (x: T) => T): (list: readonly T[]) => readonly T[];
 
 /*
 Method: all
@@ -181,7 +200,7 @@ Example:
 const list = [ 0, 1, 2, 3, 4 ]
 const predicate = x => x > -1
 
-const result = R.all(predicate, arr)
+const result = R.all(predicate, list)
 // => true
 ```
 
@@ -191,10 +210,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function all<T>(predicate: (x: T, index: number) => boolean, list: ReadonlyArray<T>): boolean;
-export function all<T>(predicate: (x: T) => boolean, list: ReadonlyArray<T>): boolean;
-export function all<T>(predicate: (x: T, index: number) => boolean): (list: ReadonlyArray<T>) => boolean;
-export function all<T>(predicate: (x: T) => boolean): (list: ReadonlyArray<T>) => boolean;
+export function all<T>(predicate: (x: T) => boolean, list: readonly T[]): boolean;
+export function all<T>(predicate: (x: T) => boolean): (list: readonly T[]) => boolean;
 
 /*
 Method: allPass
@@ -221,7 +238,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function allPass<T>(predicates: ((x: T) => boolean)[]): (input: T) => boolean;
+export function allPass<T>(predicates: readonly ((x: T) => boolean)[]): (input: T) => boolean;
 
 /*
 Method: always
@@ -247,13 +264,14 @@ export function always<T>(x: T): () => T;
 /*
 Method: and
 
-Explanation: Returns `true` if both arguments are `true`. Otherwise, it returns `false`.
+Explanation: Logical AND
 
 Example:
 
 ```
 R.and(true, true); // => true
 R.and(false, true); // => false
+R.and(true, 'foo'); // => 'foo'
 ```  
 
 Categories: Logic
@@ -262,13 +280,35 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function and<T extends { and?: ((...a: readonly any[]) => any); } | number | boolean | string | null>(fn1: T, val2: any): boolean;
-export function and<T extends { and?: ((...a: readonly any[]) => any); } | number | boolean | string | null>(fn1: T): (val2: any) => boolean;
+export function and<T, U>(x: T, y: U): T | U;
+export function and<T>(x: T): <U>(y: U) => T | U;
+
+/*
+Method: or
+
+Explanation: Logical OR
+
+Example:
+
+```
+R.or(false, true); // => true
+R.or(false, false); // => false
+R.or(false, 'foo'); // => 'foo'
+```  
+
+Categories: Logic
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function or<T, U>(a: T, b: U): T | U;
+export function or<T>(a: T): <U>(b: U) => T | U;
 
 /*
 Method: any
 
-Explanation: It returns `true`, if at least one member of `list` returns true, when passed to `predicate` function.
+Explanation: It returns `true`, if at least one member of `list` returns true, when passed to a `predicate` function.
 
 Example:
 
@@ -285,10 +325,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function any<T>(predicate: (x: T, i: number) => boolean, list: ReadonlyArray<T>): boolean;
-export function any<T>(predicate: (x: T) => boolean, list: ReadonlyArray<T>): boolean;
-export function any<T>(predicate: (x: T, i: number) => boolean): (list: ReadonlyArray<T>) => boolean;
-export function any<T>(predicate: (x: T) => boolean): (list: ReadonlyArray<T>) => boolean;
+export function any<T>(predicate: (x: T) => boolean, list: readonly T[]): boolean;
+export function any<T>(predicate: (x: T) => boolean): (list: readonly T[]) => boolean;
 
 /*
 Method: anyPass
@@ -316,23 +354,20 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function anyPass<T>(predicates: ReadonlyArray<SafePred<T>>): SafePred<T>;
+export function anyPass<T>(predicates: readonly SafePred<T>[]): SafePred<T>;
 
 /*
 Method: append
 
-Explanation: It adds element `x` at the end of `listOrString`.
+Explanation: It adds element `x` at the end of `list`.
 
 Example:
 
 ```
 const x = 'foo'
 
-const result = [
-  R.append(x, 'cherry_'),
-  R.append(x, ['bar', 'baz'])
-]
-// => ['cherry_foo', ['bar', 'baz', 'foo']]
+const result = R.append(x, ['bar', 'baz'])
+// => ['bar', 'baz', 'foo']
 ```
 
 Categories: List
@@ -341,36 +376,22 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function append<T>(x: T, listOrString: ReadonlyArray<T>): T[];
-export function append<T>(x: T): <T>(listOrString: ReadonlyArray<T>) => T[];
+export function append<T>(x: T, list: readonly T[]): readonly T[];
+export function append<T>(x: T): <T>(list: readonly T[]) => readonly T[];
 
 /*
 Method: applySpec
 
-Explanation: It returns a curried function with the same arity as the longest function in the spec object.
-Arguments will be applied to the spec methods recursively.
+Explanation: 
 
 Example:
 
 ```
-const spec = {
-  name: R.path('deeply.nested.firstname')
-}
-const json = {
-  deeply: {
-   nested: {
-      firstname: 'barry'
-    }
-  }
-}
-const result = R.applySpec(spec, json) // => { name: 'barry' }
-
-// Second example
-const getMetrics = R.applySpec({
+const fn = R.applySpec({
   sum: R.add,
   nested: { mul: R.multiply }
 })
-getMetrics(2, 4) 
+const result = fn(2, 4) 
 // => { sum: 6, nested: { mul: 8 } }
 ```
 
@@ -384,7 +405,7 @@ export function applySpec<Spec extends Record<string, (...args: readonly any[]) 
   spec: Spec
 ): (
   ...args: Parameters<ValueOfRecord<Spec>>
-) => { [Key in keyof Spec]: ReturnType<Spec[Key]> };
+) => { readonly [Key in keyof Spec]: ReturnType<Spec[Key]> };
 export function applySpec<T>(spec: any): (...args: readonly any[]) => T;
 
 /*
@@ -407,9 +428,9 @@ reference.
 
 */
 // @SINGLE_MARKER
-export function assoc<T, U, K extends string>(prop: K, newValue: T, obj: U): Record<K, T> & U;
-export function assoc<T, K extends string>(prop: K, newValue: T): <U>(obj: U) => Record<K, T> & U;
-export function assoc<K extends string>(prop: K): <T, U>(newValue: T, obj: U) => Record<K, T> & U;
+export function assoc<T, U, K extends string>(prop: K, val: T, obj: U): Record<K, T> & U;
+export function assoc<T, K extends string>(prop: K, val: T): <U>(obj: U) => Record<K, T> & U;
+export function assoc<K extends string>(prop: K): AssocPartialOne<K>;
 
 /*
 Method: assocPath
@@ -427,15 +448,15 @@ R.assocPath(path, newValue, obj)
 // => { a : 1, b : { c : 2 }}
 ```
 
-Categories:
+Categories: Object
 
-Notes: Object
+Notes:
 
 */
 // @SINGLE_MARKER
-export function assocPath<T, U>(path: Path, newValue: T, obj: U): U;
-export function assocPath<T, U>(path: Path, newValue: T): (obj: U) => U;
-export function assocPath<T, U>(path: Path): FunctionToolbelt.Curry<(newValue: T, obj: U) => U>;
+export function assocPath<Output>(path: Path, newValue: any, obj: object): Output;
+export function assocPath<Output>(path: Path, newValue: any): (obj: object) => Output;
+export function assocPath<Output>(path: Path): FunctionToolbelt.Curry<(newValue: any, obj: object) => Output>;
 
 /*
 Method: both
@@ -487,14 +508,14 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function chain<T, U>(fn: (n: T) => readonly U[], list: readonly T[]): U[];
-export function chain<T, U>(fn: (n: T) => readonly U[]): (list: readonly T[]) => U[];
+export function chain<T, U>(fn: (n: T) => readonly U[], list: readonly T[]): readonly U[];
+export function chain<T, U>(fn: (n: T) => readonly U[]): (list: readonly T[]) => readonly U[];
 export function chain<X0, X1, R>(fn: (x0: X0, x1: X1) => R, fn1: (x1: X1) => X0): (x1: X1) => R;
 
 /*
 Method: clamp
 
-Explanation: Restrict a number `input` to be withing `min` and `max` limits.
+Explanation: Restrict a number `input` to be within `min` and `max` limits.
 
 If `input` is bigger than `max`, then the result is `max`.
 
@@ -503,12 +524,15 @@ If `input` is smaller than `min`, then the result is `min`.
 Example:
 
 ```
-R.clamp(0, 10, 5) //=> 5
-R.clamp(0, 10, -1) //=> 0
-R.clamp(0, 10, 11) //=> 10
+const result = [
+  R.clamp(0, 10, 5), 
+  R.clamp(0, 10, -1),
+  R.clamp(0, 10, 11)
+]
+//=> [5, 0, 10]
 ```
 
-Categories: Other
+Categories:
 
 Notes:
 
@@ -541,7 +565,7 @@ Notes:
 */
 // @SINGLE_MARKER
 export function clone<T>(input: T): T;
-export function clone<T>(input: ReadonlyArray<T>): T[];
+export function clone<T>(input: readonly T[]): readonly T[];
 
 /*
 Method: complement
@@ -549,7 +573,6 @@ Method: complement
 Explanation: It returns `inverted` version of `origin` function that accept `input` as argument.
 
 The return value of `inverted` is the negative boolean value of `origin(input)`.
-
 
 Example:
 
@@ -569,7 +592,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function complement(pred: (...args: any[]) => boolean): (...args: any[]) => boolean;
+export function complement<T extends readonly any[]>(pred: (...args: T) => boolean): (...args: T) => boolean;
 
 /*
 Method: compose
@@ -653,8 +676,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function concat<T>(x: ReadonlyArray<T>, y: ReadonlyArray<T>): T[];
-export function concat<T>(x: ReadonlyArray<T>): (y: ReadonlyArray<T>) => T[];
+export function concat<T>(x: readonly T[], y: readonly T[]): readonly T[];
+export function concat<T>(x: readonly T[]): (y: readonly T[]) => readonly T[];
 export function concat(x: string, y: string): string;
 export function concat(x: string): (y: string) => string;
 
@@ -692,29 +715,28 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function cond(conditions: [Pred, (...a: readonly any[]) => any][]): (...a: readonly any[]) => any;
-export function cond<A, B>(conditions: [SafePred<A>, (...a: readonly A[]) => B][]): (...a: readonly A[]) => B;
+export function cond(conditions: readonly (readonly [Pred, (...a: readonly any[]) => any])[]): (...x: readonly any[]) => any;
+export function cond<A, B>(conditions: readonly (readonly [SafePred<A>, (...a: readonly A[]) => B])[]): (...x: readonly A[]) => B;
 
 /*
 Method: converge
 
-Explanation:
-
-
+Explanation: Accepts a converging function and a list of branching functions and returns a new function. When invoked, this new function is applied to some arguments, each branching function is applied to those same arguments. The results of each branching function are passed as arguments to the converging function to produce the return value.
 
 Example:
 
 ```
-
+const result = R.converge(R.multiply)([ R.add(1), R.add(3) ])(2)
+// => 15
 ```
 
-Categories:
+Categories: Function
 
-Notes:
+Notes: Explanation is taken from `Ramda` documentation
 
 */
 // @SINGLE_MARKER
-export function converge(after: ((...a: readonly any[]) => any), fns: Array<((...a: readonly any[]) => any)>): (...a: readonly any[]) => any;
+export function converge(after: ((...a: readonly any[]) => any), fns: ReadonlyArray<((...x: readonly any[]) => any)>): (...y: readonly any[]) => any;
 
 /*
 Method: curry
@@ -750,9 +772,9 @@ Example:
 
 ```
 
-Categories:
+Categories: Function
 
-Notes: Function
+Notes:
 
 */
 // @SINGLE_MARKER
@@ -762,8 +784,6 @@ export function curryN(length: number, fn: (...args: readonly any[]) => any): (.
 Method: dec
 
 Explanation: It decrements a number.
-
-
 
 Example:
 
@@ -806,9 +826,9 @@ Notes: Rambda's **defaultTo** accept indefinite number of arguments when non cur
 
 */
 // @SINGLE_MARKER
-export function defaultTo<T>(defaultValue: T): (...inputArguments: (T | null | undefined)[]) => T;
-export function defaultTo<T>(defaultValue: T, ...inputArguments: (T | null | undefined)[]): T;
-export function defaultTo<T, U>(defaultValue: T | U, ...inputArguments: (T | U | null | undefined)[]): T | U;
+export function defaultTo<T>(defaultValue: T): (...inputArguments: readonly (T | null | undefined)[]) => T;
+export function defaultTo<T>(defaultValue: T, ...inputArguments: readonly (T | null | undefined)[]): T;
+export function defaultTo<T, U>(defaultValue: T | U, ...inputArguments: readonly (T | U | null | undefined)[]): T | U;
 
 /*
 Method: difference
@@ -831,8 +851,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function difference<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>): T[];
-export function difference<T>(a: ReadonlyArray<T>): (b: ReadonlyArray<T>) => T[];
+export function difference<T>(a: readonly T[], b: readonly T[]): readonly T[];
+export function difference<T>(a: readonly T[]): (b: readonly T[]) => readonly T[];
 
 /*
 Method: dissoc
@@ -878,7 +898,7 @@ export function divide(x: number): (y: number) => number;
 /*
 Method: drop
 
-Explanation: It returns `listOrString` with `howMany` items dropped from its beginning.
+Explanation: It returns `howMany` items dropped from beginning of list or string `input`.
 
 Example:
 
@@ -893,17 +913,17 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function drop<T>(howMany: number, listOrString: ReadonlyArray<T>): T[];
-export function drop(howMany: number, listOrString: string): string;
+export function drop<T>(howMany: number, input: readonly T[]): readonly T[];
+export function drop(howMany: number, input: string): string;
 export function drop<T>(howMany: number): {
-  <T>(listOrString: readonly T[]): T[];
-  (listOrString: string): string;
+  <T>(input: readonly T[]): readonly T[];
+  (input: string): string;
 };
 
 /*
 Method: dropLast
 
-Explanation: It returns `listOrString` with `howMany` items dropped from its end.
+Explanation: It returns `howMany` items dropped from the end of list or string `input`.
 
 Example:
 
@@ -918,11 +938,11 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function dropLast<T>(howMany: number, listOrString: ReadonlyArray<T>): T[];
-export function dropLast(howMany: number, listOrString: string): string;
+export function dropLast<T>(howMany: number, input: readonly T[]): readonly T[];
+export function dropLast(howMany: number, input: string): string;
 export function dropLast<T>(howMany: number): {
-  <T>(listOrString: readonly T[]): T[];
-  (listOrString: string): string;
+  <T>(input: readonly T[]): readonly T[];
+  (input: string): string;
 };
 
 /*
@@ -1027,13 +1047,13 @@ export function F(): boolean;
 /*
 Method: filter
 
-Explanation: It filters list or object `input` with `predicate`.
+Explanation: It filters list or object `input` using a `predicate` function.
 
 Example:
 
 ```
 const list = [3, 4, 3, 2]
-const listPredicate = (x, index) => x - index > 2
+const listPredicate = x => x > 2
 
 const object = {abc: 'fo', xyz: 'bar', baz: 'foo'}
 const objectPredicate = (x, prop) => x.length + prop.length > 5
@@ -1051,10 +1071,10 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function filter<T>(predicate: FilterFunctionArray<T>): (x: T[]) => T[];
-export function filter<T>(predicate: FilterFunctionArray<T>, x: T[]): T[];
-export function filter<T, U>(predicate: FilterFunctionObject<T>): (x: Dictionary<T>) => Dictionary<T>;
-export function filter<T>(predicate: FilterFunctionObject<T>, x: Dictionary<T>): Dictionary<T>;
+export function filter<T>(predicate: Predicate<T>): (input: readonly T[]) => readonly T[];
+export function filter<T>(predicate: Predicate<T>, input: readonly T[]): readonly T[];
+export function filter<T, U>(predicate: ObjectPredicate<T>): (x: Dictionary<T>) => Dictionary<T>;
+export function filter<T>(predicate: ObjectPredicate<T>, x: Dictionary<T>): Dictionary<T>;
 
 /*
 Method: find
@@ -1079,10 +1099,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function find<T>(predicate: (x: T) => boolean, list: ReadonlyArray<T>): T | undefined;
-export function find<T>(predicate: (x: T, index: number) => boolean, list: ReadonlyArray<T>): T | undefined;
-export function find<T>(predicate: (x: T) => boolean): (list: ReadonlyArray<T>) => T | undefined;
-export function find<T>(predicate: (x: T, index: number) => boolean): (list: ReadonlyArray<T>) => T | undefined;
+export function find<T>(predicate: (x: T) => boolean, list: readonly T[]): T | undefined;
+export function find<T>(predicate: (x: T) => boolean): (list: readonly T[]) => T | undefined;
 
 /*
 Method: findIndex
@@ -1107,10 +1125,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function findIndex<T>(predicate: (x: T) => boolean, list: ReadonlyArray<T>): number;
-export function findIndex<T>(predicate: (x: T, index: number) => boolean, list: ReadonlyArray<T>): number;
-export function findIndex<T>(predicate: (x: T) => boolean): (list: ReadonlyArray<T>) => number;
-export function findIndex<T>(predicate: (x: T, index: number) => boolean): (list: ReadonlyArray<T>) => number;
+export function findIndex<T>(predicate: (x: T) => boolean, list: readonly T[]): number;
+export function findIndex<T>(predicate: (x: T) => boolean): (list: readonly T[]) => number;
 
 /*
 Method: findLast
@@ -1135,10 +1151,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function findLast<T>(fn: (x: T) => boolean, list: T[]): T | undefined;
-export function findLast<T>(fn: (x: T, index: number) => boolean, list: T[]): T | undefined;
-export function findLast<T>(fn: (x: T) => boolean): (list: T[]) => T | undefined;
-export function findLast<T>(fn: (x: T, index: number) => boolean): (list: T[]) => T | undefined;
+export function findLast<T>(fn: (x: T) => boolean, list: readonly T[]): T | undefined;
+export function findLast<T>(fn: (x: T) => boolean): (list: readonly T[]) => T | undefined;
 
 /*
 Method: findLastIndex
@@ -1163,10 +1177,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function findLastIndex<T>(predicate: (x: T) => boolean, list: T[]): number;
-export function findLastIndex<T>(predicate: (x: T, index: number) => boolean, list: T[]): number;
-export function findLastIndex<T>(predicate: (x: T) => boolean): (list: T[]) => number;
-export function findLastIndex<T>(predicate: (x: T, index: number) => boolean): (list: T[]) => number;
+export function findLastIndex<T>(predicate: (x: T) => boolean, list: readonly T[]): number;
+export function findLastIndex<T>(predicate: (x: T) => boolean): (list: readonly T[]) => number;
 
 /*
 Method: flatten
@@ -1191,7 +1203,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function flatten<T>(list: ReadonlyArray<any>): T[];
+export function flatten<T>(list: readonly any[]): readonly T[];
 
 /*
 Method: flip
@@ -1217,7 +1229,7 @@ Notes: Rambda's **flip** will throw if the arity of the input function is greate
 */
 // @SINGLE_MARKER
 export function flip<T, U, TResult>(fn: (arg0: T, arg1: U) => TResult): (arg1: U, arg0?: T) => TResult;
-export function flip<F extends (...args: any) => any, P extends FunctionToolbelt.Parameters<F>>(fn: F): FunctionToolbelt.Curry<(...args: ListToolbelt.Merge<[P[1], P[0]], P>) => FunctionToolbelt.Return<F>>;
+export function flip<F extends (...args: any) => any, P extends FunctionToolbelt.Parameters<F>>(fn: F): FunctionToolbelt.Curry<(...args: ListToolbelt.Merge<readonly [P[1], P[0]], P>) => FunctionToolbelt.Return<F>>;
 
 /*
 Method: forEach
@@ -1242,12 +1254,10 @@ Notes: It works with objects, unlike `Ramda`.
 
 */
 // @SINGLE_MARKER
-export function forEach<T, U>(fn: MapFunctionObject<T, U>, list: Dictionary<T>): Dictionary<T>;
-export function forEach<T, U>(fn: MapFunctionArray<T, U>, list: T[]): T[];
-export function forEach<T, U>(fn: MapFunctionArray<T, U>): (list: T[]) => T[];
-export function forEach<T, U, S>(fn: MapFunctionObject<T, U>): (list: Dictionary<T>) => Dictionary<T>;
-export function forEach<T>(fn: MapFunctionArray<T, T>): (list: T[]) => T[];
-export function forEach<T>(fn: MapFunctionArray<T, T>, list: ReadonlyArray<T>): T[];
+export function forEach<T>(fn: Iterator<T, void>, list: readonly T[]): readonly T[];
+export function forEach<T>(fn: Iterator<T, void>): (list: readonly T[]) => readonly T[];
+export function forEach<T>(fn: ObjectIterator<T, void>, list: Dictionary<T>): Dictionary<T>;
+export function forEach<T, U>(fn: ObjectIterator<T, void>): (list: Dictionary<T>) => Dictionary<T>;
 
 /*
 Method: fromPairs
@@ -1274,8 +1284,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function fromPairs<V>(listOfPairs: KeyValuePair<string, V>[]): { [index: string]: V };
-export function fromPairs<V>(listOfPairs: KeyValuePair<number, V>[]): { [index: number]: V };
+export function fromPairs<V>(listOfPairs: readonly KeyValuePair<string, V>[]): { readonly [index: string]: V };
+export function fromPairs<V>(listOfPairs: readonly KeyValuePair<number, V>[]): { readonly [index: number]: V };
 
 /*
 Method: groupBy
@@ -1298,13 +1308,13 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function groupBy<T>(groupFn: (x: T) => string, list: ReadonlyArray<T>): { [index: string]: T[] };
-export function groupBy<T>(groupFn: (x: T) => string): (list: ReadonlyArray<T>) => { [index: string]: T[] };
+export function groupBy<T>(groupFn: (x: T) => string, list: readonly T[]): { readonly [index: string]: readonly T[] };
+export function groupBy<T>(groupFn: (x: T) => string): (list: readonly T[]) => { readonly [index: string]: readonly T[] };
 
 /*
 Method: groupWith
 
-Explanation: It returns separated version of `list`, where separation is done with equality `compareFn` function.
+Explanation: It returns separated version of list or string `input`, where separation is done with equality `compareFn` function.
 
 Example:
 
@@ -1316,15 +1326,15 @@ const result = R.groupWith(isConsecutive, list)
 // => [[1], [2,2], [1,1], [2]]
 ```
 
-Categories: List
+Categories: List, String
 
 Notes:
 
 */
 // @SINGLE_MARKER
-export function groupWith<T>(compareFn: (x: T, y: T) => boolean): (list: ReadonlyArray<T>) => T[][];
-export function groupWith<T>(compareFn: (x: T, y: T) => boolean, list: ReadonlyArray<T>): T[][];
-export function groupWith<T>(compareFn: (x: T, y: T) => boolean, list: string): string[];
+export function groupWith<T>(compareFn: (x: T, y: T) => boolean): (input: readonly T[]) => readonly (readonly T[])[];
+export function groupWith<T>(compareFn: (x: T, y: T) => boolean, input: readonly T[]): readonly (readonly T[])[];
+export function groupWith<T>(compareFn: (x: T, y: T) => boolean, input: string): readonly string[];
 
 /*
 Method: has
@@ -1379,17 +1389,17 @@ Notes:
 */
 // @SINGLE_MARKER
 export function hasPath<T>(
-  path: string | string[],
+  path: string | readonly string[],
   input: object
 ): boolean;
 export function hasPath<T>(
-  path: string | string[]
+  path: string | readonly string[]
 ): (input: object) => boolean;
 
 /*
 Method: head
 
-Explanation: It returns the first element of `listOrString`.
+Explanation: It returns the first element of list or string `input`.
 
 Example:
 
@@ -1407,8 +1417,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function head<T>(listOrString: T[]): T | undefined;
-export function head(listOrString: string): string;
+export function head<T>(input: readonly T[]): T | undefined;
+export function head(input: string): string;
 
 /*
 Method: identical
@@ -1536,10 +1546,10 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function includes(valueToFind: string, input: ReadonlyArray<string> | string): boolean;
-export function includes(valueToFind: string): (input: ReadonlyArray<string> | string) => boolean;
-export function includes<T>(valueToFind: T, input: ReadonlyArray<T>): boolean;
-export function includes<T>(valueToFind: T): (input: ReadonlyArray<T>) => boolean;
+export function includes(valueToFind: string, input: readonly string[] | string): boolean;
+export function includes(valueToFind: string): (input: readonly string[] | string) => boolean;
+export function includes<T>(valueToFind: T, input: readonly T[]): boolean;
+export function includes<T>(valueToFind: T): (input: readonly T[]) => boolean;
 
 /*
 Method: indexBy
@@ -1576,10 +1586,12 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function indexBy<T>(condition: (x: T) => string, list: ReadonlyArray<T>): { [key: string]: T };
-export function indexBy<T>(condition: string, list: ReadonlyArray<T>): { [key: string]: T };
-export function indexBy<T>(condition: (x: T) => string): (list: ReadonlyArray<T>) => { [key: string]: T };
-export function indexBy<T>(condition: string): (list: ReadonlyArray<T>) => { [key: string]: T };
+export function indexBy<T, K extends string | number = string>(condition: (key: T) => K, list: readonly T[]): { readonly [key in K]: T };
+export function indexBy<T, K extends string | number | undefined = string>(condition: (key: T) => K, list: readonly T[]): { readonly [key in NonNullable<K>]?: T };
+export function indexBy<T, K extends string | number = string>(condition: (key: T) => K): (list: readonly T[]) => { readonly [key in K]: T };
+export function indexBy<T, K extends string | number | undefined = string>(condition: (key: T) => K | undefined): (list: readonly T[]) => { readonly [key in NonNullable<K>]?: T };
+export function indexBy<T>(condition: string, list: readonly T[]): { readonly [key: string]: T };
+export function indexBy<T>(condition: string): (list: readonly T[]) => { readonly [key: string]: T };
 
 /*
 Method: indexOf
@@ -1606,13 +1618,13 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function indexOf<T>(valueToFind: T, list: ReadonlyArray<T>): number;
-export function indexOf<T>(valueToFind: T): (list: ReadonlyArray<T>) => number;
+export function indexOf<T>(valueToFind: T, list: readonly T[]): number;
+export function indexOf<T>(valueToFind: T): (list: readonly T[]) => number;
 
 /*
 Method: init
 
-Explanation: It returns all but the last element of `listOrString`.
+Explanation: It returns all but the last element of list or string `input`.
 
 Example:
 
@@ -1630,8 +1642,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function init<T>(listOrString: ReadonlyArray<T>): T[];
-export function init(listOrString: string): string;
+export function init<T>(input: readonly T[]): readonly T[];
+export function init(input: string): string;
 
 /*
 Method: intersection
@@ -1654,8 +1666,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function intersection<T>(listA: ReadonlyArray<T>, listB: ReadonlyArray<T>): T[];
-export function intersection<T>(listA: ReadonlyArray<T>): (listB: ReadonlyArray<T>) => T[];
+export function intersection<T>(listA: readonly T[], listB: readonly T[]): readonly T[];
+export function intersection<T>(listA: readonly T[]): (listB: readonly T[]) => readonly T[];
 
 /*
 Method: intersperse
@@ -1677,8 +1689,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function intersperse<T>(separator: T, list: ReadonlyArray<T>): T[];
-export function intersperse<T>(separator: T): (list: ReadonlyArray<T>) => T[];
+export function intersperse<T>(separator: T, list: readonly T[]): readonly T[];
+export function intersperse<T>(separator: T): (list: readonly T[]) => readonly T[];
 
 /*
 Method: is
@@ -1767,8 +1779,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function join<T>(glue: string, list: ReadonlyArray<T>): string;
-export function join<T>(glue: string): (list: ReadonlyArray<T>) => string;
+export function join<T>(glue: string, list: readonly T[]): string;
+export function join<T>(glue: string): (list: readonly T[]) => string;
 
 /*
 Method: keys
@@ -1787,8 +1799,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function keys<T extends object>(x: T): (keyof T)[];
-export function keys<T>(x: T): string[];
+export function keys<T extends object>(x: T): readonly (keyof T)[];
+export function keys<T>(x: T): readonly string[];
 
 /*
 Method: last
@@ -1813,7 +1825,7 @@ Notes:
 // @SINGLE_MARKER
 export function last(str: string): string;
 export function last(emptyList: readonly []): undefined;
-export function last<T extends any>(list: readonly T[]): T | undefined;
+export function last<T extends any>(list: readonly T[]): T;
 
 /*
 Method: lastIndexOf
@@ -1841,13 +1853,13 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function lastIndexOf<T>(target: T, list: ReadonlyArray<T>): number;
-export function lastIndexOf<T>(target: T): (list: ReadonlyArray<T>) => number;
+export function lastIndexOf<T>(target: T, list: readonly T[]): number;
+export function lastIndexOf<T>(target: T): (list: readonly T[]) => number;
 
 /*
 Method: length
 
-Explanation: It returns the `length` property of `listOrString`.
+Explanation: It returns the `length` property of list or string `input`.
 
 Example:
 
@@ -1865,7 +1877,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function length<T>(listOrString: ReadonlyArray<T>): number;
+export function length<T>(input: readonly T[]): number;
 
 /*
 Method: lens
@@ -1892,7 +1904,6 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function lens<T, U, V>(getter: (s: T) => U, setter: (a: U, s: T) => V): Lens;
 export function lens<T, U, V>(getter: (s: T) => U, setter: (a: U, s: T) => V): Lens;
 
 /*
@@ -1999,11 +2010,11 @@ Notes:
 */
 // @SINGLE_MARKER
 export function over<T>(lens: Lens, fn: Arity1Fn, value: T): T;
-export function over<T>(lens: Lens, fn: Arity1Fn, value: readonly T[]): T[];
+export function over<T>(lens: Lens, fn: Arity1Fn, value: readonly T[]): readonly T[];
 export function over(lens: Lens, fn: Arity1Fn): <T>(value: T) => T;
-export function over(lens: Lens, fn: Arity1Fn): <T>(value: readonly T[]) => T[];
+export function over(lens: Lens, fn: Arity1Fn): <T>(value: readonly T[]) => readonly T[];
 export function over(lens: Lens): <T>(fn: Arity1Fn, value: T) => T;
-export function over(lens: Lens): <T>(fn: Arity1Fn, value: readonly T[]) => T[];
+export function over(lens: Lens): <T>(fn: Arity1Fn, value: readonly T[]) => readonly T[];
 
 /*
 Method: set
@@ -2057,40 +2068,40 @@ export function view<T, U>(lens: Lens, target: T): U;
 /*
 Method: map
 
-Explanation: It returns the result of looping through `list` with `fn`.
+Explanation: It returns the result of looping through `iterable` with `fn`.
 
 It works with both array and object. 
 
 Example:
 
 ```
-const fn = (x, i) => (x * 2) + i
+const fn = x => x * 2
 const fnWhenObject = (val, prop)=>{
   return `${prop}-${val}`
 }
 
-const list = [1, 2]
+const iterable = [1, 2]
 const obj = {a: 1, b: 2}
 
 const result = [ 
   R.map(fn, list),
   R.map(fnWhenObject, obj)
 ]
-// => [ [2, 5], {a: 'a-1', b: 'b-2'}] 
+// => [ [1, 4], {a: 'a-1', b: 'b-2'}] 
 ```
 
 Categories: List, Object
 
-Notes: Unlike Ramda's `map`, here array keys are passed as second argument to `fn` when `list` is an array.
+Notes: Unlike Ramda's `map`, here property and input object are passed as arguments to `fn`, when `iterable` is an object.
 
 */
 // @SINGLE_MARKER
-export function map<T, U>(fn: MapFunctionObject<T, U>, list: Dictionary<T>): Dictionary<U>;
-export function map<T, U>(fn: MapFunctionArray<T, U>, list: T[]): U[];
-export function map<T, U>(fn: MapFunctionArray<T, U>): (list: T[]) => U[];
-export function map<T, U, S>(fn: MapFunctionObject<T, U>): (list: Dictionary<T>) => Dictionary<U>;
-export function map<T>(fn: MapFunctionArray<T, T>): (list: T[]) => T[];
-export function map<T>(fn: MapFunctionArray<T, T>, list: ReadonlyArray<T>): T[];
+export function map<T, U>(fn: ObjectIterator<T, U>, iterable: Dictionary<T>): Dictionary<U>;
+export function map<T, U>(fn: Iterator<T, U>, iterable: readonly T[]): readonly U[];
+export function map<T, U>(fn: Iterator<T, U>): (iterable: readonly T[]) => readonly U[];
+export function map<T, U, S>(fn: ObjectIterator<T, U>): (iterable: Dictionary<T>) => Dictionary<U>;
+export function map<T>(fn: Iterator<T, T>): (iterable: readonly T[]) => readonly T[];
+export function map<T>(fn: Iterator<T, T>, iterable: readonly T[]): readonly T[];
 
 /*
 Method: match
@@ -2113,8 +2124,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function match(regExpression: RegExp, str: string): string[];
-export function match(regExpression: RegExp): (str: string) => string[];
+export function match(regExpression: RegExp, str: string): readonly string[];
+export function match(regExpression: RegExp): (str: string) => readonly string[];
 
 /*
 Method: mathMod
@@ -2207,7 +2218,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mean(list: ReadonlyArray<number>): number;
+export function mean(list: readonly number[]): number;
 
 /*
 Method: median
@@ -2226,7 +2237,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function median(list: ReadonlyArray<number>): number;
+export function median(list: readonly number[]): number;
 
 /*
 Method: merge
@@ -2280,8 +2291,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mergeAll<T>(list: object[]): T;
-export function mergeAll(list: object[]): object;
+export function mergeAll<T>(list: readonly object[]): T;
+export function mergeAll(list: readonly object[]): object;
 
 /*
 Method: mergeDeepRight
@@ -2419,15 +2430,15 @@ const result = R.move(0, 1, list)
 
 Categories: List
 
-Notes: Rambda.move doesn't support negative indexes - it throws an error
+Notes: Rambda.move doesn't support negative indexes - it throws an error.
 
 */
 // @SINGLE_MARKER
-export function move<T>(fromIndex: number, toIndex: number, list: readonly T[]): T[];
-export function move(fromIndex: number, toIndex: number): <T>(list: readonly T[]) => T[];
+export function move<T>(fromIndex: number, toIndex: number, list: readonly T[]): readonly T[];
+export function move(fromIndex: number, toIndex: number): <T>(list: readonly T[]) => readonly T[];
 export function move(fromIndex: number): {
-    <T>(toIndex: number, list: readonly T[]): T[];
-    (toIndex: number): <T>(list: readonly T[]) => T[];
+    <T>(toIndex: number, list: readonly T[]): readonly T[];
+    (toIndex: number): <T>(list: readonly T[]) => readonly T[];
 };
 
 /*
@@ -2491,10 +2502,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function none<T>(predicate: (x: T, index: number) => boolean, list: ReadonlyArray<T>): boolean;
-export function none<T>(predicate: (x: T) => boolean, list: ReadonlyArray<T>): boolean;
-export function none<T>(predicate: (x: T, index: number) => boolean): (list: ReadonlyArray<T>) => boolean;
-export function none<T>(predicate: (x: T) => boolean): (list: ReadonlyArray<T>) => boolean;
+export function none<T>(predicate: (x: T) => boolean, list: readonly T[]): boolean;
+export function none<T>(predicate: (x: T) => boolean): (list: readonly T[]) => boolean;
 
 /*
 Method: not
@@ -2541,8 +2550,32 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function nth<T>(index: number, list: ReadonlyArray<T>): T | undefined;	
-export function nth(index: number): <T>(list: ReadonlyArray<T>) => T | undefined;
+export function nth<T>(index: number, list: readonly T[]): T | undefined;	
+export function nth(index: number): <T>(list: readonly T[]) => T | undefined;
+
+/*
+Method: once
+
+Explanation: It returns a function, which invokes only once `fn` function.
+
+Example:
+
+```
+let result = 0
+const addOnce = R.once((x) => result = result + x)
+
+addOnce(1)
+addOnce(1)
+// => 1
+```
+
+Categories: Function
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function once<T extends (...args: readonly any[]) => any>(func: T): T;
 
 /*
 Method: omit
@@ -2579,7 +2612,7 @@ export function omit<T>(propsToOmit: string): (obj: object) => T;
 /*
 Method: of
 
-Explanation: It returns a partial copy of an `obj` without `propsToOmit` properties.
+Explanation:
 
 Example:
 
@@ -2588,13 +2621,13 @@ R.of(null); //=> [null]
 R.of([42]); //=> [[42]]
 ```
 
-Categories: Function
+Categories:
 
-Notes: This of is different from the ES6 of; See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/of
+Notes: 
 
 */
 // @SINGLE_MARKER
-export function of<T>(x: T): T[];
+export function of<T>(x: T): readonly T[];
 
 /*
 Method: partial
@@ -2625,20 +2658,18 @@ Notes: Rambda's partial doesn't need the input arguments to be wrapped as array.
 
 */
 // @SINGLE_MARKER
-export function partial<V0, V1, T>(fn: (x0: V0, x1: V1) => T, args: [V0]): (x1: V1) => T;
-export function partial<V0, V1, V2, T>(fn: (x0: V0, x1: V1, x2: V2) => T, args: [V0, V1]): (x2: V2) => T;
-export function partial<V0, V1, V2, T>(fn: (x0: V0, x1: V1, x2: V2) => T, args: [V0]): (x1: V1, x2: V2) => T;
-export function partial<V0, V1, V2, V3, T>(fn: (x0: V0, x1: V1, x2: V2, x3: V3) => T, args: [V0, V1, V2]): (x2: V3) => T;
-export function partial<V0, V1, V2, V3, T>(fn: (x0: V0, x1: V1, x2: V2, x3: V3) => T, args: [V0, V1]): (x2: V2, x3: V3) => T;
-export function partial<V0, V1, V2, V3, T>(fn: (x0: V0, x1: V1, x2: V2, x3: V3) => T, args: [V0]): (x1: V1, x2: V2, x3: V3) => T;
-export function partial<T>(fn: (...a: readonly any[]) => T, args: readonly any[]): (...a: readonly any[]) => T;
+export function partial<V0, V1, T>(fn: (x0: V0, x1: V1) => T, args: readonly [V0]): (x1: V1) => T;
+export function partial<V0, V1, V2, T>(fn: (x0: V0, x1: V1, x2: V2) => T, args: readonly [V0, V1]): (x2: V2) => T;
+export function partial<V0, V1, V2, T>(fn: (x0: V0, x1: V1, x2: V2) => T, args: readonly [V0]): (x1: V1, x2: V2) => T;
+export function partial<V0, V1, V2, V3, T>(fn: (x0: V0, x1: V1, x2: V2, x3: V3) => T, args: readonly [V0, V1, V2]): (x2: V3) => T;
+export function partial<V0, V1, V2, V3, T>(fn: (x0: V0, x1: V1, x2: V2, x3: V3) => T, args: readonly [V0, V1]): (x2: V2, x3: V3) => T;
+export function partial<V0, V1, V2, V3, T>(fn: (x0: V0, x1: V1, x2: V2, x3: V3) => T, args: readonly [V0]): (x1: V1, x2: V2, x3: V3) => T;
+export function partial<T>(fn: (...a: readonly any[]) => T, args: readonly any[]): (...x: readonly any[]) => T;
 
 /*
 Method: partition
 
 Explanation: It will return array of two objects/arrays according to `predicate` function. The first member holds all instanses of `input` that pass the `predicate` function, while the second member - those who doesn't.
-
-`input` can be either an object or an array unlike `Ramda` where only array is a valid input.
 
 Example:
 
@@ -2665,19 +2696,19 @@ Notes:
 */
 // @SINGLE_MARKER
 export function partition<T>(
-  predicate: Predicatex<T>,
-  input: T[]
-): [T[], T[]];
+  predicate: Predicate<T>,
+  input: readonly T[]
+): readonly [readonly T[], readonly T[]];
 export function partition<T>(
-  predicate: Predicatex<T>
-): (input: T[]) => [T[], T[]];
+  predicate: Predicate<T>
+): (input: readonly T[]) => readonly [readonly T[], readonly T[]];
 export function partition<T>(
   predicate: (x: T, prop?: string) => boolean,
-  input: { [key: string]: T}
-): [{ [key: string]: T}, { [key: string]: T}];
+  input: { readonly [key: string]: T}
+): readonly [{ readonly [key: string]: T}, { readonly [key: string]: T}];
 export function partition<T>(
   predicate: (x: T, prop?: string) => boolean
-): (input: { [key: string]: T}) => [{ [key: string]: T}, { [key: string]: T}];
+): (input: { readonly [key: string]: T}) => readonly [{ readonly [key: string]: T}, { readonly [key: string]: T}];
 
 /*
 Method: path
@@ -2707,10 +2738,10 @@ Notes: String anotation of `pathToSearch` is one of the differences between `Ram
 
 */
 // @SINGLE_MARKER
-export function path<Input, T>(pathToSearch: string | string[], obj: Input): T | undefined;
-export function path<T>(pathToSearch: string | string[], obj: any): T | undefined;
-export function path<T>(pathToSearch: string | string[]): (obj: any) => T | undefined;
-export function path<Input, T>(pathToSearch: string | string[]): (obj: Input) => T | undefined;
+export function path<Input, T>(pathToSearch: Path, obj: Input): T | undefined;
+export function path<T>(pathToSearch: Path, obj: any): T | undefined;
+export function path<T>(pathToSearch: Path): (obj: any) => T | undefined;
+export function path<Input, T>(pathToSearch: Path): (obj: Input) => T | undefined;
 
 /*
 Method: pathEq
@@ -2777,10 +2808,10 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function paths<Input, T>(pathsToSearch: Path[], obj: Input): (T | undefined)[];
-export function paths<Input, T>(pathsToSearch: Path[]): (obj: Input) => (T | undefined)[];
-export function paths<T>(pathsToSearch: Path[], obj: any): (T | undefined)[];
-export function paths<T>(pathsToSearch: Path[]): (obj: any) => (T | undefined)[];
+export function paths<Input, T>(pathsToSearch: readonly Path[], obj: Input): readonly (T | undefined)[];
+export function paths<Input, T>(pathsToSearch: readonly Path[]): (obj: Input) => readonly (T | undefined)[];
+export function paths<T>(pathsToSearch: readonly Path[], obj: any): readonly (T | undefined)[];
+export function paths<T>(pathsToSearch: readonly Path[]): (obj: any) => readonly (T | undefined)[];
 
 /*
 Method: pathOr
@@ -3127,7 +3158,6 @@ export function pipe<V0, V1, V2, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
   fn8: (x: T8) => T9,
   fn9: (x: T9) => T10): (x0: V0, x1: V1, x2: V2) => T10;
 
-
 /*
 Method: pluck
 
@@ -3149,36 +3179,31 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function pluck<T>(property: number, list: ReadonlyArray<T>): T;
-export function pluck<K extends keyof T, T>(property: K, list: ReadonlyArray<T>): T[K][];
-export function pluck(property: number): <T>(list: ReadonlyArray<T>) => T;
-export function pluck<P extends string>(property: P): <T>(list: ReadonlyArray<Record<P, T>>) => T[];
+export function pluck<K extends keyof T, T>(property: K, list: readonly T[]): ReadonlyArray<T[K]>;
+export function pluck<T>(property: number, list: ReadonlyArray<{ readonly [k: number]: T }>): readonly T[];
+export function pluck<P extends string>(property: P): <T>(list: ReadonlyArray<Record<P, T>>) => readonly T[];
+export function pluck(property: number): <T>(list: ReadonlyArray<{ readonly [k: number]: T }>) => readonly T[];
 
 /*
 Method: prepend
 
-Explanation: It adds element `x` at the beginning of `listOrString`.
+Explanation: It adds element `x` at the beginning of `list`.
 
 Example:
 
 ```
-const x = 'foo'
-
-const result = [
-  R.prepend(x, '_cherry'),
-  R.prepend(x, ['bar', 'baz'])
-]
-// => ['foo_cherry', ['foo', 'bar', 'baz']]
+const result = R.prepend('foo', ['bar', 'baz'])
+// => ['foo', 'bar', 'baz']
 ```
 
-Categories: List, String
+Categories: List
 
 Notes:
 
 */
 // @SINGLE_MARKER
-export function prepend<T>(x: T, listOrString: ReadonlyArray<T>): T[];
-export function prepend<T>(x: T): (listOrString: ReadonlyArray<T>) => T[];
+export function prepend<T>(x: T, input: readonly T[]): readonly T[];
+export function prepend<T>(x: T): (input: readonly T[]) => readonly T[];
 
 /*
 Method: product
@@ -3198,7 +3223,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function product(list: ReadonlyArray<number>): number;
+export function product(list: readonly number[]): number;
 
 /*
 Method: prop
@@ -3224,8 +3249,8 @@ Notes:
 */
 // @SINGLE_MARKER
 export function prop<P extends keyof T, T>(propToFind: P, obj: T): T[P];
-export function prop<P extends string>(p: P): <T>(propToFind: Record<P, T>) => T;
-export function prop<P extends string, T>(p: P): (propToFind: Record<P, T>) => T;
+export function prop<P extends string | number>(p: P): <T>(propToFind: Record<P, T>) => T;
+export function prop<P extends keyof T, T>(p: P): (propToFind: Record<P, T>) => T;
 
 /*
 Method: propEq
@@ -3254,11 +3279,11 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function propEq<T, K extends keyof T>(propToFind: K, valueToMatch: T[K], obj: T): boolean;
-export function propEq<T, K extends keyof T>(propToFind: K, valueToMatch: T[K]): (obj: T) => boolean;
-export function propEq<T, K extends keyof T>(propToFind: K): {
-   (valueToMatch: T[K], obj: T): boolean;
-   (valueToMatch: T[K]): (obj: T) => boolean;
+export function propEq<K extends string | number>(propToFind: K, valueToMatch: any, obj: Record<K, any>): boolean;
+export function propEq<K extends string | number>(propToFind: K, valueToMatch: any): (obj: Record<K, any>) => boolean;
+export function propEq<K extends string | number>(propToFind: K): {
+  (valueToMatch: any, obj: Record<K, any>): boolean;
+  (valueToMatch: any): (obj: Record<K, any>) => boolean;
 };
 
 /*
@@ -3318,14 +3343,17 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function propOr<T>(defaultValue: T, property: string, obj: { [key: string]: T}): T;
-export function propOr<T>(defaultValue: T, property: string): (obj: { [key: string]: T}) => T;
-export function propOr<T>(defaultValue: T): FunctionToolbelt.Curry<(property: string, obj: { [key: string]: T}) => T>;
+export function propOr<T, P extends string>(defaultValue: T, property: P, obj: Partial<Record<P, T>> | undefined): T;
+export function propOr<T, P extends string>(defaultValue: T, property: P): (obj: Partial<Record<P, T>> | undefined) => T;
+export function propOr<T>(defaultValue: T): {
+  <P extends string>(property: P, obj: Partial<Record<P, T>> | undefined): T;
+  <P extends string>(property: P): (obj: Partial<Record<P, T>> | undefined) => T;
+}
 
 /*
 Method: range
 
-Explanation: It returns list of numbers between `startInclusive` to `endExclusive` numbers.
+Explanation: It returns list of numbers between `startInclusive` to `endExclusive` markers.
 
 Example:
 
@@ -3340,8 +3368,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function range(startInclusive: number, endExclusive: number): number[];
-export function range(startInclusive: number): (endExclusive: number) => number[];
+export function range(startInclusive: number, endExclusive: number): readonly number[];
+export function range(startInclusive: number): (endExclusive: number) => readonly number[];
 
 /*
 Method: reduce
@@ -3365,45 +3393,45 @@ Notes: It passes index of the list as third argument to `reducer` function.
 
 */
 // @SINGLE_MARKER
-export function reduce<T, TResult>(reducer: (prev: TResult, current: T, i: number) => TResult, initialValue: TResult, list: ReadonlyArray<T>): TResult;
-export function reduce<T, TResult>(reducer: (prev: TResult, current: T) => TResult, initialValue: TResult, list: ReadonlyArray<T>): TResult;
-export function reduce<T, TResult>(reducer: (prev: TResult, current: T, i?: number) => TResult): (initialValue: TResult, list: ReadonlyArray<T>) => TResult;
-export function reduce<T, TResult>(reducer: (prev: TResult, current: T, i?: number) => TResult, initialValue: TResult): (list: ReadonlyArray<T>) => TResult;
+export function reduce<T, TResult>(reducer: (prev: TResult, current: T, i: number) => TResult, initialValue: TResult, list: readonly T[]): TResult;
+export function reduce<T, TResult>(reducer: (prev: TResult, current: T) => TResult, initialValue: TResult, list: readonly T[]): TResult;
+export function reduce<T, TResult>(reducer: (prev: TResult, current: T, i?: number) => TResult): (initialValue: TResult, list: readonly T[]) => TResult;
+export function reduce<T, TResult>(reducer: (prev: TResult, current: T, i?: number) => TResult, initialValue: TResult): (list: readonly T[]) => TResult;
 
 /*
 Method: reject
 
 Explanation: It has the opposite effect of `R.filter`.
 
-It will return those members of `list` that return `false` when applied to `predicate` function.
-
 Example:
 
 ```
 const list = [1, 2, 3, 4]
-const predicate = x => x > 2
+const obj = {a: 1, b: 2}
+const predicate = x => x > 1
 
 const result = [
   R.reject(predicate, list)
+  R.reject(predicate, obj)
 ]
-// => [1, 2]
+// => [[1, 2], {a: 1}]
 ```
 
-Categories: List
+Categories: List, Object
 
-Notes: As it uses `R.filter`, this method works also with objects.
+Notes:
 
 */
 // @SINGLE_MARKER
-export function reject<T>(predicate: FilterFunctionArray<T>): (x: T[]) => T[];
-export function reject<T>(predicate: FilterFunctionArray<T>, x: T[]): T[];
-export function reject<T, U>(predicate: FilterFunctionObject<T>): (x: Dictionary<T>) => Dictionary<T>;
-export function reject<T>(predicate: FilterFunctionObject<T>, x: Dictionary<T>): Dictionary<T>;
+export function reject<T>(predicate: Predicate<T>, list: readonly T[]): readonly T[];
+export function reject<T>(predicate: Predicate<T>): (list: readonly T[]) => readonly T[];
+export function reject<T>(predicate: Predicate<T>, obj: Dictionary<T>): Dictionary<T>;
+export function reject<T, U>(predicate: Predicate<T>): (obj: Dictionary<T>) => Dictionary<T>;
 
 /*
 Method: repeat
 
-Explanation: It returns a list of `x` input repeated `timesToRepeat` input.
+Explanation: 
 
 Example:
 
@@ -3418,8 +3446,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function repeat<T>(x: T): (timesToRepeat: number) => T[];
-export function repeat<T>(x: T, timesToRepeat: number): T[];
+export function repeat<T>(x: T): (timesToRepeat: number) => readonly T[];
+export function repeat<T>(x: T, timesToRepeat: number): readonly T[];
 
 /*
 Method: replace
@@ -3448,7 +3476,7 @@ export function replace(strOrRegex: RegExp | string): (replacer: string) => (str
 /*
 Method: reverse
 
-Explanation: It returns a reversed copy of `listOrString` input. 
+Explanation: It returns a reversed copy of list or string `input`. 
 
 Example:
 
@@ -3466,13 +3494,13 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function reverse<T>(listOrString: ReadonlyArray<T>): T[];
-export function reverse(listOrString: string): string;
+export function reverse<T>(input: readonly T[]): readonly T[];
+export function reverse(input: string): string;
 
 /*
 Method: slice
 
-Explanation: It returns `listOrString` between `from` and `to` indexes. 
+Explanation: 
 
 Example:
 
@@ -3495,15 +3523,15 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function slice(from: number, to: number, list: string): string;
-export function slice<T>(from: number, to: number, list: T[]): T[];
+export function slice(from: number, to: number, input: string): string;
+export function slice<T>(from: number, to: number, input: readonly T[]): readonly T[];
 export function slice(from: number, to: number): {
-  (list: string): string;
-  <T>(list: T[]): T[];
+  (input: string): string;
+  <T>(input: readonly T[]): readonly T[];
 };
 export function slice(from: number): {
-  (to: number, list: string): string;
-  <T>(to: number, list: T[]): T[];
+  (to: number, input: string): string;
+  <T>(to: number, input: readonly T[]): readonly T[];
 };
 
 /*
@@ -3538,8 +3566,8 @@ Notes: `sortFn` function must return a number.
 
 */
 // @SINGLE_MARKER
-export function sort<T>(sortFn: (a: T, b: T) => number, list: ReadonlyArray<T>): T[];
-export function sort<T>(sortFn: (a: T, b: T) => number): (list: ReadonlyArray<T>) => T[];
+export function sort<T>(sortFn: (a: T, b: T) => number, list: readonly T[]): readonly T[];
+export function sort<T>(sortFn: (a: T, b: T) => number): (list: readonly T[]) => readonly T[];
 
 /*
 Method: sortBy
@@ -3571,8 +3599,8 @@ Notes: `sortFn` function must return a value to compare.
 
 */
 // @SINGLE_MARKER
-export function sortBy<T>(sortFn: (a: T) => Ord, list: ReadonlyArray<T>): T[];
-export function sortBy(sortFn: (a: any) => Ord): <T>(list: ReadonlyArray<T>) => T[];
+export function sortBy<T>(sortFn: (a: T) => Ord, list: readonly T[]): readonly T[];
+export function sortBy(sortFn: (a: any) => Ord): <T>(list: readonly T[]) => readonly T[];
 
 /*
 Method: split
@@ -3594,13 +3622,13 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function split(separator: string | RegExp): (str: string) => string[];
-export function split(separator: string | RegExp, str: string): string[];
+export function split(separator: string | RegExp): (str: string) => readonly string[];
+export function split(separator: string | RegExp, str: string): readonly string[];
 
 /*
 Method: splitEvery
 
-Explanation: It splits `listOrString` into slices of `sliceLength`.
+Explanation: It splits `input` into slices of `sliceLength`.
 
 Example:
 
@@ -3623,11 +3651,11 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function splitEvery<T>(sliceLength: number, listOrString: ReadonlyArray<T>): T[][];
-export function splitEvery(sliceLength: number, listOrString: string): string[];
+export function splitEvery<T>(sliceLength: number, input: readonly T[]): readonly (readonly T[])[];
+export function splitEvery(sliceLength: number, input: string): readonly string[];
 export function splitEvery(sliceLength: number): {
-  (listOrString: string): string[];
-  <T>(listOrString: ReadonlyArray<T>): T[][];
+  (input: string): readonly string[];
+  <T>(input: readonly T[]): readonly (readonly T[])[];
 };
 
 /*
@@ -3698,7 +3726,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function sum(list: ReadonlyArray<number>): number;
+export function sum(list: readonly number[]): number;
 
 /*
 Method: symmetricDifference
@@ -3721,8 +3749,8 @@ Notes: `R.equals` is used to determine equality, i.e. it can be safely used with
 
 */
 // @SINGLE_MARKER
-export function symmetricDifference<T>(x: ReadonlyArray<T>, y: ReadonlyArray<T>): T[];
-export function symmetricDifference<T>(x: ReadonlyArray<T>): <T>(y: ReadonlyArray<T>) => T[];
+export function symmetricDifference<T>(x: readonly T[], y: readonly T[]): readonly T[];
+export function symmetricDifference<T>(x: readonly T[]): <T>(y: readonly T[]) => readonly T[];
 
 /*
 Method: T
@@ -3749,7 +3777,7 @@ export function T(): boolean;
 /*
 Method: tail
 
-Explanation: It returns all but the first element of `listOrString`.
+Explanation: It returns all but the first element of `input`.
 
 Example:
 
@@ -3767,13 +3795,13 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function tail<T>(listOrString: ReadonlyArray<T>): T[];
-export function tail(listOrString: string): string;
+export function tail<T>(input: readonly T[]): readonly T[];
+export function tail(input: string): string;
 
 /*
 Method: take
 
-Explanation: It returns the first `howMany` elements of `listOrString`.
+Explanation: It returns the first `howMany` elements of `input`.
 
 
 Example:
@@ -3794,18 +3822,17 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function take<T>(howMany: number, listOrString: ReadonlyArray<T>): T[];
-export function take(howMany: number, listOrString: string): string;
+export function take<T>(howMany: number, input: readonly T[]): readonly T[];
+export function take(howMany: number, input: string): string;
 export function take<T>(howMany: number): {
-  <T>(listOrString: readonly T[]): T[];
-  (listOrString: string): string;
+  <T>(input: readonly T[]): readonly T[];
+  (input: string): string;
 };
 
 /*
 Method: takeLast
 
-Explanation: It returns the last `howMany` elements of `listOrString`.
-
+Explanation: It returns the last `howMany` elements of `input`.
 
 Example:
 
@@ -3825,11 +3852,11 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function takeLast<T>(howMany: number, listOrString: ReadonlyArray<T>): T[];
-export function takeLast(howMany: number, listOrString: string): string;
+export function takeLast<T>(howMany: number, input: readonly T[]): readonly T[];
+export function takeLast(howMany: number, input: string): string;
 export function takeLast<T>(howMany: number): {
-  <T>(listOrString: readonly T[]): T[];
-  (listOrString: string): string;
+  <T>(input: readonly T[]): readonly T[];
+  (input: string): string;
 };
 
 /*
@@ -3859,8 +3886,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function tap<T>(fn: (a: T) => any, x: T): T;
-export function tap<T>(fn: (a: T) => any): (x: T) => T;
+export function tap<T>(fn: (x: T) => void, input: T): T;
+export function tap<T>(fn: (x: T) => void): (input: T) => T;
 
 /*
 Method: test
@@ -3906,8 +3933,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function times<T>(fn: (i: number) => T, howMany: number): T[];
-export function times<T>(fn: (i: number) => T): (howMany: number) => T[];
+export function times<T>(fn: (i: number) => T, howMany: number): readonly T[];
+export function times<T>(fn: (i: number) => T): (howMany: number) => readonly T[];
 
 /*
 Method: toLower
@@ -3975,7 +4002,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function toPairs<S>(obj: { [k: string]: S } | { [k: number]: S }): [string, S][];
+export function toPairs<S>(obj: { readonly [k: string]: S } | { readonly [k: number]: S }): readonly (readonly [string, S])[];
 
 /*
 Method: toString
@@ -4018,7 +4045,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function transpose<T>(list: T[][]): T[][];
+export function transpose<T>(list: readonly (readonly T[])[]): readonly (readonly T[])[];
 
 /*
 Method: trim
@@ -4045,8 +4072,6 @@ Method: tryCatch
 
 Explanation: It returns function that runs `fn` in `try/catch` block. If there was an error, then `fallback` is used to return the result. Note that `fn` can be value or asynchronous/synchronous function(unlike `Ramda` where fallback can only be a synchronous function).
 
-Please check the tests of `R.tryCatch` to fully understand how this method works.
-
 Example:
 
 ```
@@ -4059,9 +4084,9 @@ const result = [
 // => [false, 'bar']
 ```
 
-Categories: Async, Function
+Categories: Function
 
-Notes:
+Notes: Please check the tests of `R.tryCatch` to fully understand how this method works.
 
 */
 // @SINGLE_MARKER
@@ -4115,7 +4140,7 @@ Notes: `NaN`, `Promise` and `Async` are types specific for **Rambda**.
 
 */
 // @SINGLE_MARKER
-export function type(x: any): "Object" | "Number" | "Boolean" | "String" | "Null" | "Array" | "Function" | "Undefined" | "Async" | "Promise" | "RegExp" | "NaN";
+export function type(x: any): RambdaTypes;
 
 /*
 Method: union
@@ -4137,8 +4162,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function union<T>(x: Array<T>, y: Array<T>): Array<T>;
-export function union<T>(x: Array<T>): (y: Array<T>) => Array<T>;
+export function union<T>(x: readonly T[], y: readonly T[]): readonly T[];
+export function union<T>(x: readonly T[]): (y: readonly T[]) => readonly T[];
 
 /*
 Method: uniq
@@ -4160,7 +4185,7 @@ Notes: `R.equals` is used to determine equality
 
 */
 // @SINGLE_MARKER
-export function uniq<T>(list: ReadonlyArray<T>): T[];
+export function uniq<T>(list: readonly T[]): readonly T[];
 
 /*
 Method: uniqWith
@@ -4196,8 +4221,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean, list: ReadonlyArray<T>): T[];
-export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean): (list: ReadonlyArray<T>) => T[];
+export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean, list: readonly T[]): readonly T[];
+export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean): (list: readonly T[]) => readonly T[];
 
 /*
 Method: unless
@@ -4254,8 +4279,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function update<T>(index: number, newValue: T, list: ReadonlyArray<T>): T[];
-export function update<T>(index: number, newValue: T): (list: ReadonlyArray<T>) => T[];
+export function update<T>(index: number, newValue: T, list: readonly T[]): readonly T[];
+export function update<T>(index: number, newValue: T): (list: readonly T[]) => readonly T[];
 
 /*
 Method: values
@@ -4277,7 +4302,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function values<T extends object, K extends keyof T>(obj: T): T[K][];
+export function values<T extends object, K extends keyof T>(obj: T): readonly T[K][];
 
 /*
 Method: when
@@ -4313,9 +4338,9 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U, input: T): U;
-export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U): (input: T) => U;
-export function when<T, U>(predicate: (x: T) => boolean): FunctionToolbelt.Curry<(whenTrueFn: (a: T) => U, input: T) => U>;
+export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U, input: T): T | U;
+export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U): (input: T) => T | U;
+export function when<T, U>(predicate: (x: T) => boolean): FunctionToolbelt.Curry<(whenTrueFn: (a: T) => U, input: T) => T | U>;
 
 /*
 Method: where
@@ -4398,15 +4423,13 @@ Notes: `R.equals` is used to determine equality
 
 */
 // @SINGLE_MARKER
-export function without<T>(matchAgainst: ReadonlyArray<T>, source: ReadonlyArray<T>): T[];
-export function without<T>(matchAgainst: ReadonlyArray<T>): (source: ReadonlyArray<T>) => T[];
+export function without<T>(matchAgainst: readonly T[], source: readonly T[]): readonly T[];
+export function without<T>(matchAgainst: readonly T[]): (source: readonly T[]) => readonly T[];
 
 /*
 Method: xor
 
-Explanation:
-
-
+Explanation: Logical XOR
 
 Example:
 
@@ -4454,8 +4477,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function zip<K, V>(x: ReadonlyArray<K>, y: ReadonlyArray<V>): KeyValuePair<K, V>[];
-export function zip<K>(x: ReadonlyArray<K>): <V>(y: ReadonlyArray<V>) => KeyValuePair<K, V>[];
+export function zip<K, V>(x: readonly K[], y: readonly V[]): readonly KeyValuePair<K, V>[];
+export function zip<K>(x: readonly K[]): <V>(y: readonly V[]) => readonly KeyValuePair<K, V>[];
 
 /*
 Method: zipObj
@@ -4481,8 +4504,325 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function zipObj<T>(keys: ReadonlyArray<string>, values: ReadonlyArray<T>): { [index: string]: T };
-export function zipObj(keys: ReadonlyArray<string>): <T>(values: ReadonlyArray<T>) => { [index: string]: T };
+export function zipObj<T, K extends string>(keys: readonly K[], values: readonly T[]): { readonly [P in K]: T };
+export function zipObj<K extends string>(keys: readonly K[]): <T>(values: readonly T[]) => { readonly [P in K]: T };
+export function zipObj<T, K extends number>(keys: readonly K[], values: readonly T[]): { readonly [P in K]: T };
+export function zipObj<K extends number>(keys: readonly K[]): <T>(values: readonly T[]) => { readonly [P in K]: T };
+
+/*
+Method: props
+
+Explanation: It takes list with properties `propsToPick` and returns a list with property values in `obj`.
+
+Example:
+
+```
+const result = [
+  R.props(['a', 'b'], {a:1, c:3})
+// => [1, undefined]
+```
+
+Categories: Object
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function props<P extends string, T>(propsToPick: readonly P[], obj: Record<P, T>): readonly T[];
+export function props<P extends string>(propsToPick: readonly P[]): <T>(obj: Record<P, T>) => readonly T[];
+export function props<P extends string, T>(propsToPick: readonly P[]): (obj: Record<P, T>) => readonly T[];
+
+/*
+Method: zipWith
+
+Explanation:
+
+Example:
+
+```
+const list1 = [ 10, 20, 30, 40 ]
+const list2 = [ 100, 200 ]
+
+const result = R.zipWith(
+  R.add, list1, list2
+)
+// => [110, 220]
+```
+
+Categories: List
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function zipWith<T, U, TResult>(fn: (x: T, y: U) => TResult, list1: readonly T[], list2: readonly U[]): readonly TResult[];
+export function zipWith<T, U, TResult>(fn: (x: T, y: U) => TResult, list1: readonly T[]): (list2: readonly U[]) => readonly TResult[];
+export function zipWith<T, U, TResult>(fn: (x: T, y: U) => TResult): (list1: readonly T[], list2: readonly U[]) => readonly TResult[];
+
+/*
+Method: splitAt
+
+Explanation: It splits string or array at a given index.
+
+Example:
+
+```
+const list = [ 1, 2, 3 ]
+const result = splitAt(2, list)
+// => [[ 1, 2 ], [ 3 ]]
+```
+
+Categories: List, String
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function splitAt<T>(index: number, input: readonly T[]): readonly [readonly T[], readonly T[]];
+export function splitAt(index: number, input: string): readonly [string, string];
+export function splitAt(index: number): {
+    <T>(input: readonly T[]): readonly [readonly T[], readonly T[]];
+    (input: string): readonly [string, string];
+};
+
+/*
+Method: splitWhen
+
+Explanation: It splits `list` to two arrays according to a `predicate` function. 
+
+The first array contains all members of `list` before `predicate` returns `true`.
+
+Example:
+
+```
+const list = [1, 2, 1, 2]
+const result = R.splitWhen(R.equals(2), list)
+// => [[1], [2, 1, 2]]
+```
+
+Categories: List
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function splitWhen<T, U>(predicate: Predicate<T>, list: readonly U[]): readonly (readonly U[])[];
+export function splitWhen<T>(predicate: Predicate<T>): <U>(list: readonly U[]) => readonly (readonly U[])[];
+
+/*
+Method: takeLastWhile
+
+Explanation: 
+
+Example:
+
+```
+const result = R.takeLastWhile(
+  x => x > 2,
+  [1, 2, 3, 4]
+)
+// => [3, 4]
+```
+
+Categories: List, String
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function takeLastWhile(predicate: (x: string) => boolean, input: string): string;
+export function takeLastWhile(predicate: (x: string) => boolean): (input: string) => string;
+export function takeLastWhile<T>(predicate: (x: T) => boolean, input: readonly T[]): readonly T[];
+export function takeLastWhile<T>(predicate: (x: T) => boolean): <T>(input: readonly T[]) => readonly T[];
+
+/*
+Method: evolve
+
+Explanation: It takes object or array of functions as set of rules. These `rules` are applied to the `iterable` input to produce the result.
+
+Example:
+
+```
+const rules = {
+  foo : add(1),
+  bar : add(-1),
+}
+const input = {
+  a   : 1,
+  foo : 2,
+  bar : 3,
+}
+const result = evolve(rules, input)
+const expected = {
+  a   : 1,
+  foo : 3,
+  bar : 2,
+})
+// => `result` is equal to `expected`
+```
+
+Categories: Object, List
+
+Notes: Error handling of this method differs between Ramda and Rambda. Ramda for some wrong inputs returns result and for other - it returns one of the inputs. Rambda simply throws when inputs are not correct. Full details for this mismatch are listed in `source/_snapshots/evolve.spec.js.snap` file.
+
+*/
+// @SINGLE_MARKER
+export function evolve<T, U>(rules: ReadonlyArray<(x: T) => U>, list: readonly T[]): readonly U[];
+export function evolve<T, U>(rules: ReadonlyArray<(x: T) => U>) : (list: readonly T[]) => readonly U[];
+export function evolve<E extends Evolver, V extends Evolvable<E>>(rules: E, obj: V): Evolve<V, E>;
+export function evolve<E extends Evolver>(rules: E): <V extends Evolvable<E>>(obj: V) => Evolve<V, E>;
+
+/*
+Method: dropLastWhile
+
+Explanation:
+
+Example:
+
+```
+const list = [1, 2, 3, 4, 5];
+const predicate = x => x >= 3
+
+const result = dropLastWhile(predicate, list);
+// => [1, 2]
+```
+
+Categories: List, String
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function dropLastWhile(predicate: (x: string) => boolean, iterable: string): string;
+export function dropLastWhile(predicate: (x: string) => boolean): (iterable: string) => string;
+export function dropLastWhile<T>(predicate: (x: T) => boolean, iterable: readonly T[]): readonly T[];
+export function dropLastWhile<T>(predicate: (x: T) => boolean): <T>(iterable: readonly T[]) => readonly T[];
+
+/*
+Method: dropRepeats
+
+Explanation: It removes any successive duplicates according to `R.equals`.
+
+Example:
+
+```
+const result = R.dropRepeats([
+  1, 
+  1, 
+  {a: 1}, 
+  {a:1}, 
+  1
+])
+// => [1, {a: 1}, 1]
+```
+
+Categories: List
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function dropRepeats<T>(list: readonly T[]): readonly T[];
+
+/*
+Method: dropRepeatsWith
+
+Explanation:
+
+Example:
+
+```
+const list = [{a:1,b:2}, {a:1,b:3}, {a:2, b:4}]
+const result = R.dropRepeatsWith(R.prop('a'))
+
+// => [{a:1,b:2}, {a:2, b:4}]
+```
+
+Categories: List
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function dropRepeatsWith<T>(predicate: (x: T, y: T) => boolean, list: readonly T[]): readonly T[];
+export function dropRepeatsWith<T>(predicate: (x: T, y: T) => boolean): (list: readonly T[]) => readonly T[];
+
+/*
+Method: dropWhile
+
+Explanation:
+
+Example:
+
+```
+const list = [1, 2, 3, 4]
+const predicate = x => x < 3
+const result = R.dropWhile(predicate, list)
+// => [3, 4]
+```
+
+Categories: List, String
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function dropWhile(fn: Predicate<string>, iterable: string): string;
+export function dropWhile(fn: Predicate<string>): (iterable: string) => string;
+export function dropWhile<T>(fn: Predicate<T>, iterable: readonly T[]): readonly T[];
+export function dropWhile<T>(fn: Predicate<T>): (iterable: readonly T[]) => readonly T[];
+
+/*
+Method: takeWhile
+
+Explanation:
+
+Example:
+
+```
+const list = [1, 2, 3, 4]
+const predicate = x => x < 3
+
+const result = R.takeWhile(predicate, list)
+// => [1, 2]
+```
+
+Categories: List, String
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function takeWhile(fn: Predicate<string>, iterable: string): string;
+export function takeWhile(fn: Predicate<string>): (iterable: string) => string;
+export function takeWhile<T>(fn: Predicate<T>, iterable: readonly T[]): readonly T[];
+export function takeWhile<T>(fn: Predicate<T>): (iterable: readonly T[]) => readonly T[];
+
+/*
+Method: eqProps
+
+Explanation: It returns `true` if property `prop` in `obj1` is equal to property `prop` in `obj2` according to `R.equals`.
+
+
+
+Example:
+
+```
+const obj1 = {a: 1, b:2}
+const obj2 = {a: 1, b:3}
+const result = R.eqProps('a', obj1, obj2)
+// => true 
+```
+
+Categories: Object
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function eqProps<T, U>(prop: string, obj1: T, obj2: U): boolean;
+export function eqProps<P extends string>(prop: P): <T, U>(obj1: Record<P, T>, obj2: Record<P, U>) => boolean;
+export function eqProps<T>(prop: string, obj1: T): <U>(obj2: U) => boolean;
 
 // RAMBDAX_MARKER_START
 
@@ -4508,7 +4848,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function allFalse(...inputs: any[]): boolean;
+export function allFalse(...inputs: readonly any[]): boolean;
 
 /*
 Method: anyFalse
@@ -4528,7 +4868,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function anyFalse(...input: any[]): boolean;
+export function anyFalse(...input: readonly any[]): boolean;
 
 /*
 Method: allTrue
@@ -4548,7 +4888,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function allTrue(...input: any[]): boolean;
+export function allTrue(...input: readonly any[]): boolean;
 
 /*
 Method: anyTrue
@@ -4568,7 +4908,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function anyTrue(...input: any[]): boolean;
+export function anyTrue(...input: readonly any[]): boolean;
 
 /*
 Method: allType
@@ -4592,7 +4932,7 @@ Notes: `targetType` is one of the possible returns of `R.type`
 
 */
 // @SINGLE_MARKER
-export function allType(targetType: RambdaTypes): (...input: any[]) => boolean;
+export function allType(targetType: RambdaTypes): (...input: readonly any[]) => boolean;
 
 /*
 Method: anyType
@@ -4618,94 +4958,7 @@ Notes: `targetType` is one of the possible returns of `R.type`
 
 */
 // @SINGLE_MARKER
-export function anyType(targetType: RambdaTypes): (...input: any[]) => boolean;
-
-/*
-Method: change
-
-Explanation: It helps changing object's properties if there are below 3 levels deep.
-
-It is intended for usage inside unit tests, when you need more powerful method to change object's properties.
-
-`path` input argument allows you to specify which object's sub-branch you want to focus on. You must pass an empty string if you target the whole `origin` object.
-
-`changeData` can be a direct value or an object. If it is a object, then this object is used to edit or add new properties to the selected sub-branch.
-
-Example:
-
-```
-const result = R.change(
-  { a: 1, b: { c: 2 } },
-  'b.c',
-  10
-)
-const expected = {
-  a: 1,
-  b: { c: 10 }
-}
-// => `result` is equal to `expected`
-
-const origin = {
-  foo : 1,
-  bar : { nested : 2 },
-}
-const changeData = {
-  bar : { a : 3 },
-  baz : 4,
-}
-const complexResult = R.change(
-  origin, '', changeData
-)
-
-const complexExpected = {
-  foo : 1,
-  bar : {
-    a : 3,
-    nested : 2,
-  },
-  baz: 4
-}
-// => `complexResult` is equal to `complexExpected`
-```
-
-Categories: Object
-
-Notes:
-
-*/
-// @SINGLE_MARKER
-export function change<T>(
-  origin: object,
-  path: string,
-  changeData: any
-): T;
-export function change<Input, Output>(
-  origin: Input,
-  path: string,
-  changeData: any
-): Output;
-
-/*
-Method: compact
-
-Explanation: It returns a clone of `list` without the falsy or empty elements.
-
-Example:
-
-```
-const list = [null, '', {}, [], 1]
-
-const result = R.compact(list)
-// => [1]
-```
-
-Categories: List
-
-Notes:
-
-*/
-// @SINGLE_MARKER
-export function compact<T>(x: any[]): T[];
+export function anyType(targetType: RambdaTypes): (...input: readonly any[]) => boolean;
 
 /*
 Method: composeAsync
@@ -4716,16 +4969,19 @@ Example:
 
 ```
 const add = async x => {
-  await R.delay(500)
+  await R.delay(100)
   return x + 1
 }
-const identity = async x => x
+const multiply = async x => {
+  await R.delay(100)
+  return x * 2 
+}
 
 const result = await R.composeAsync(
   add,
-  identity
-)(0)
-// `result` resolves to `1`
+  multiply
+)(1)
+// `result` resolves to `3`
 ```
 
 Categories: Function, Async
@@ -4735,10 +4991,47 @@ Notes: It doesn't work with promises or function returning promises such as `con
 */
 // @SINGLE_MARKER
 export function composeAsync<Out>(
-  ...fns: (Async<any> | Func<any>)[]
+  ...fns: readonly (Async<any> | Func<any>)[]
 ): (input: any) => Promise<Out>;
 export function composeAsync<Out>(
-  ...fns: (Async<any> | Func<any>)[]
+  ...fns: readonly (Async<any> | Func<any>)[]
+): (input: any) => Promise<Out>;
+
+/*
+Method: pipeAsync
+
+Explanation: Asynchronous version of `R.pipe`
+
+Example:
+
+```
+const add = async x => {
+  await R.delay(100)
+  return x + 1
+}
+const multiply = async x => {
+  await R.delay(100)
+  return x * 2 
+}
+
+const result = await R.pipeAsync(
+  add,
+  multiply
+)(1)
+// `result` resolves to `4`
+```
+
+Categories: Function, Async
+
+Notes: It doesn't work with promises or function returning promises such as `const foo = input => new Promise(...)`.
+
+*/
+// @SINGLE_MARKER
+export function pipeAsync<Out>(
+  ...fns: readonly (Async<any> | Func<any>)[]
+): (input: any) => Promise<Out>;
+export function pipeAsync<Out>(
+  ...fns: readonly (Async<any> | Func<any>)[]
 ): (input: any) => Promise<Out>;
 
 /*
@@ -4762,8 +5055,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function count<T>(searchFor: T, list: any[]): number;
-export function count<T>(searchFor: T): (list: any[]) => number;
+export function count<T>(searchFor: T, list: readonly any[]): number;
+export function count<T>(searchFor: T): (list: readonly any[]) => number;
 
 /*
 Method: debounce
@@ -4847,10 +5140,10 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function filterAsync<T>(fn: AsyncPredicate<T>, list: T[]): Promise<T[]>;
-export function filterAsync<T>(fn: AsyncPredicateIndexed<T>, list: T[]): Promise<T[]>;
-export function filterAsync<T>(fn: AsyncPredicate<T>) : ( list: T[]) => Promise<T[]>;
-export function filterAsync<T>(fn: AsyncPredicateIndexed<T>) : ( list: T[]) => Promise<T[]>;
+export function filterAsync<T>(fn: AsyncPredicate<T>, list: readonly T[]): Promise<readonly T[]>;
+export function filterAsync<T>(fn: AsyncPredicateIndexed<T>, list: readonly T[]): Promise<readonly T[]>;
+export function filterAsync<T>(fn: AsyncPredicate<T>) : ( list: readonly T[]) => Promise<readonly T[]>;
+export function filterAsync<T>(fn: AsyncPredicateIndexed<T>) : ( list: readonly T[]) => Promise<readonly T[]>;
 
 /*
 Method: glue
@@ -4908,7 +5201,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function getter<T>(keyOrKeys: string | string[] | undefined): T;
+export function getter<T>(keyOrKeys: string | readonly string[] | undefined): T;
 
 /*
 Method: setter
@@ -5149,8 +5442,8 @@ const schema = {a: Number, b: async x => {
 }}
 
 const result = await Promise.all([
-  R.isValid({schema, input}),
-  R.isValid({schema, input: invalidInput})
+  R.isValidAsync({schema, input}),
+  R.isValidAsync({schema, input: invalidInput})
 ])
 // => [true, false]
 ```
@@ -5187,10 +5480,10 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mapAsync<T, K>(fn: AsyncIterable<T, K>, list: T[]): Promise<K[]>;
-export function mapAsync<T, K>(fn: AsyncIterableIndexed<T, K>, list: T[]): Promise<K[]>;
-export function mapAsync<T, K>(fn: AsyncIterable<T, K>) : ( list: T[]) => Promise<K[]>;
-export function mapAsync<T, K>(fn: AsyncIterableIndexed<T, K>) : ( list: T[]) => Promise<K[]>;
+export function mapAsync<T, K>(fn: AsyncIterable<T, K>, list: readonly T[]): Promise<readonly K[]>;
+export function mapAsync<T, K>(fn: AsyncIterableIndexed<T, K>, list: readonly T[]): Promise<readonly K[]>;
+export function mapAsync<T, K>(fn: AsyncIterable<T, K>) : ( list: readonly T[]) => Promise<readonly K[]>;
+export function mapAsync<T, K>(fn: AsyncIterableIndexed<T, K>) : ( list: readonly T[]) => Promise<readonly K[]>;
 
 /*
 Method: mapFastAsync
@@ -5216,10 +5509,10 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mapFastAsync<T, K>(fn: AsyncIterable<T, K>, list: T[]): Promise<K[]>;
-export function mapFastAsync<T, K>(fn: AsyncIterableIndexed<T, K>, list: T[]): Promise<K[]>;
-export function mapFastAsync<T, K>(fn: AsyncIterable<T, K>) : ( list: T[]) => Promise<K[]>;
-export function mapFastAsync<T, K>(fn: AsyncIterableIndexed<T, K>) : ( list: T[]) => Promise<K[]>;
+export function mapFastAsync<T, K>(fn: AsyncIterable<T, K>, list: readonly T[]): Promise<readonly K[]>;
+export function mapFastAsync<T, K>(fn: AsyncIterableIndexed<T, K>, list: readonly T[]): Promise<readonly K[]>;
+export function mapFastAsync<T, K>(fn: AsyncIterable<T, K>) : ( list: readonly T[]) => Promise<readonly K[]>;
+export function mapFastAsync<T, K>(fn: AsyncIterableIndexed<T, K>) : ( list: readonly T[]) => Promise<readonly K[]>;
 
 /*
 Method: mapAsyncLimit
@@ -5238,8 +5531,10 @@ Notes: For example usage, please check `R.mapAsyncLimit` tests.
 
 */
 // @SINGLE_MARKER
-export function mapAsyncLimit<T, K>(fn: AsyncIterable<T, K>, limit: number, list: T[]): Promise<K[]>;
-export function mapAsyncLimit<T, K>(fn: AsyncIterableIndexed<T, K>, limit: number, list: T[]): Promise<K[]>;
+export function mapAsyncLimit<T, K>(fn: AsyncIterable<T, K>, limit: number, list: readonly T[]): Promise<readonly K[]>;
+export function mapAsyncLimit<T, K>(fn: AsyncIterable<T, K>, limit: number): (list: readonly T[]) => Promise<readonly K[]>;
+export function mapAsyncLimit<T, K>(fn: AsyncIterableIndexed<T, K>, limit: number, list: readonly T[]): Promise<readonly K[]>;
+export function mapAsyncLimit<T, K>(fn: AsyncIterableIndexed<T, K>, limit: number): (list: readonly T[]) => Promise<readonly K[]>;
 
 /*
 Method: mapToObject
@@ -5272,8 +5567,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mapToObject<T, U>(fn: (input: T) => object|false, list: T[]): U;
-export function mapToObject<T, U>(fn: (input: T) => object|false): (list: T[]) => U;
+export function mapToObject<T, U>(fn: (input: T) => object|false, list: readonly T[]): U;
+export function mapToObject<T, U>(fn: (input: T) => object|false): (list: readonly T[]) => U;
 
 /*
 Method: mapToObjectAsync
@@ -5292,7 +5587,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mapToObjectAsync<T, U>(fn: (input: T) => Promise<object|false>, list: T[]): Promise<U>;
+export function mapToObjectAsync<T, U>(fn: (input: T) => Promise<object|false>, list: readonly T[]): Promise<U>;
+export function mapToObjectAsync<T, U>(fn: (input: T) => Promise<object|false>): (list: readonly T[]) => Promise<U>;
 
 /*
 Method: mapKeys
@@ -5314,8 +5610,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mapKeys<T, U>(changeKeyFn: (x: string) => string, obj: { [key: string]: T}): U;
-export function mapKeys<T, U>(changeKeyFn: (x: string) => string): (obj: { [key: string]: T}) => U;
+export function mapKeys<T, U>(changeKeyFn: (x: string) => string, obj: { readonly [key: string]: T}): U;
+export function mapKeys<T, U>(changeKeyFn: (x: string) => string): (obj: { readonly [key: string]: T}) => U;
 
 /*
 Method: maybe
@@ -5381,7 +5677,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function memoize<T, K extends any[]>(fn: (...inputs: K) => T): (...inputs: K) => T;
+export function memoize<T, K extends readonly any[]>(fn: (...inputs: K) => T): (...inputs: K) => T;
 
 /*
 Method: nextIndex
@@ -5410,7 +5706,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function nextIndex(index: number, list: any[]): number;
+export function nextIndex(index: number, list: readonly any[]): number;
 
 /*
 Method: prevIndex
@@ -5438,7 +5734,7 @@ Notes: Unlike `R.nextIndex`, which safeguards against index out of bounds, this 
 
 */
 // @SINGLE_MARKER
-export function prevIndex(index: number, list: any[]): number;
+export function prevIndex(index: number, list: readonly any[]): number;
 
 /*
 Method: ok
@@ -5466,7 +5762,7 @@ Notes: It is same as `R.pass` but instead of returning `false`, it throws an err
 
 */
 // @SINGLE_MARKER
-export function ok(...inputs: any[]): (...schemas: any[]) => void | never;
+export function ok(...inputs: readonly any[]): (...schemas: readonly any[]) => void | never;
 
 /*
 Method: pass
@@ -5492,31 +5788,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function pass(...inputs: any[]): (...rules: any[]) => boolean;
-
-/*
-Method: once
-
-Explanation: It returns a function, which invokes only once `fn` function.
-
-Example:
-
-```
-let result = 0
-const addOnce = R.once((x) => result = result + x)
-
-addOnce(1)
-addOnce(1)
-// => 1
-```
-
-Categories: Function
-
-Notes:
-
-*/
-// @SINGLE_MARKER
-export function once<T extends (...args: any[]) => any>(func: T): T;
+export function pass(...inputs: readonly any[]): (...rules: readonly any[]) => boolean;
 
 /*
 Method: partialCurry
@@ -5570,10 +5842,10 @@ Notes: Independently, similar method is implemented in `Ramada` library, but the
 
 */
 // @SINGLE_MARKER
-export function piped<T>(input: any, ...fnList: Func<any>[]): T;
+export function piped<T>(input: any, ...fnList: readonly Func<any>[]): T;
 
 /*
-Method:
+Method: pipedAsync
 
 Explanation: It accepts input as first argument and series of functions as next arguments. It is same as `R.pipe` but with support for asynchronous functions.
 
@@ -5604,50 +5876,92 @@ Notes: Functions that return `Promise` will be handled as regular function not a
 // @SINGLE_MARKER
 export function pipedAsync<T>(
   input: any,
-  ...fns: (Func<any> | Async<any>)[]
+  ...fns: readonly (Func<any> | Async<any>)[]
 ): Promise<T>;
 
 /*
 Method: produce
 
-Explanation: It returns an object created by applying each value of `rules` to `input` argument
-
-`rules` input is an object with synchronous or asynchronous functions as values.
-
-If there is at least one member of `rules` that is asynchronous, then the return value is a promise.
+Explanation: It returns an object created by applying each value of `rules` to `input` argument.
 
 Example:
 
 ```
 const rules = {
-  foo: x =>  > 10,
-  bar: x => ({baz: x})
+  foo: R.pipe(R.add(1), R.add(2)),
+  a: {b: add(3)}
 }
-const input = 7
+const input = i
 const result = R.produce(rules, input)
 
 const expected = {
-  foo: false,
-  bar: {baz: 7}
+  foo: 4,
+  a: {b: 4}
+}
+// => `result` is equal to `expected`
+```
+
+Categories: Object
+
+Notes: In Typescript context, `rules` functions can be only 1 level deep. In Javascript context, there is no such restriction.
+
+*/
+// @SINGLE_MARKER
+export function produce<Input extends any, Output>(
+  rules: ProduceRules<Output, keyof Output, Input>,
+  input: Input
+): Output;
+export function produce<Input extends any, Output>(
+  rules: ProduceRules<Output, keyof Output, Input>
+): <Input>(
+  input: Input
+) => Output;
+
+/*
+Method: produceAsync
+
+Explanation: It returns an object created by applying each value of `rules` to `input` argument.
+
+`rules` input is an object with synchronous or asynchronous functions as values.
+
+The return value is wrapped in a promise, even if all `rules` are synchronous functions.
+
+Example:
+
+```
+const rules = {
+  foo: async x => {
+    await R.delay(100)
+    return x > 1
+  },
+  bar: x => ({baz: x})
+}
+const input = 2
+const result = await R.produceAsync(rules, input)
+
+const expected = {
+  foo: true,
+  bar: {baz: 2}
 }
 // => `result` is equal to `expected`
 ```
 
 Categories: Function, Async
 
-Notes: It is very similar to `R.applySpec`. TODO - improve typings
+Notes:
 
 */
 // @SINGLE_MARKER
-export function produce<Input, Output>(
-  rules: ProduceRules<Input>,
+export function produceAsync<Input extends any, Output>(
+  rules: ProduceAsyncRules<Output, keyof Output, Input>,
   input: Input
-): Output;
-export function produce<Input, Output>(
-  rules: ProduceRules<Input>
-): (
+): Promise<Output>;
+export function produceAsync<Input extends any, Output>(
+  rules: ProduceAsyncRules<Output, keyof Output, Input>
+): <Input>(
   input: Input
-) => Output;
+) => Promise<Output>;
+
 
 /*
 Method: random
@@ -5687,16 +6001,16 @@ const result = remove(
 
 Categories: String
 
-Notes:
+Notes: This is the only case where Rambdax exports clashes with Ramda API, as Ramda has `remove` method. If `Rambda.remove` is introduced, then this method will be renamed.
 
 */
 // @SINGLE_MARKER
 export function remove(
-  toRemove: string | RegExp | (string | RegExp)[],
+  toRemove: string | RegExp | readonly (string | RegExp)[],
   text: string
 ): string;
 export function remove(
-  toRemove: string | RegExp | (string | RegExp)[]
+  toRemove: string | RegExp | readonly (string | RegExp)[]
 ): (text: string) => string;
 
 /*
@@ -5744,9 +6058,9 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function replaceAll(patterns: Array<RegExp | string>, replacer: string, input: string): string;
-export function replaceAll(patterns: Array<RegExp | string>, replacer: string): (input: string) => string;
-export function replaceAll(patterns: Array<RegExp | string>): (replacer: string) => (input: string) => string;
+export function replaceAll(patterns: ReadonlyArray<RegExp | string>, replacer: string, input: string): string;
+export function replaceAll(patterns: ReadonlyArray<RegExp | string>, replacer: string): (input: string) => string;
+export function replaceAll(patterns: ReadonlyArray<RegExp | string>): (replacer: string) => (input: string) => string;
 
 /*
 Method: shuffle
@@ -5765,7 +6079,7 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function shuffle<T>(list: T[]): T[];
+export function shuffle<T>(list: readonly T[]): readonly T[];
 
 /*
 Method: sortObject
@@ -5787,8 +6101,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function sortObject<T>(predicate: SortObjectPredicate<T>, input: { [key: string]: T }): { [keyOutput: string]: T };
-export function sortObject<T>(predicate: SortObjectPredicate<T>): (input: { [key: string]: T }) => { [keyOutput: string]: T };
+export function sortObject<T>(predicate: SortObjectPredicate<T>, input: { readonly [key: string]: T }): { readonly [keyOutput: string]: T };
+export function sortObject<T>(predicate: SortObjectPredicate<T>): (input: { readonly [key: string]: T }) => { readonly [keyOutput: string]: T };
 
 /*
 Method: switcher
@@ -5914,8 +6228,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function wait<T>(fn: Promise<T>): Promise<[T, Error|undefined]>;
-export function wait<T>(fn: (x: any) => Promise<T>): Promise<[T, Error|undefined]>;
+export function wait<T>(fn: Promise<T>): Promise<readonly [T, Error|undefined]>;
+export function wait<T>(fn: (x: any) => Promise<T>): Promise<readonly [T, Error|undefined]>;
 
 /*
 Method: waitFor
@@ -5995,8 +6309,8 @@ Notes: Idea for this method comes from `ramda-adjunct` library
 // @SINGLE_MARKER
 export function lensEq<T, U>(lens: Lens, target: T, input: U): boolean;
 export function lensEq<T, U>(lens: Lens, target: T):  (input: U) => boolean;
-export function lensEq<T>(lens: Lens, target: T, input: Array<T>): boolean;
-export function lensEq<T>(lens: Lens, target: T): (input: Array<T>) => boolean;
+export function lensEq<T>(lens: Lens, target: T, input: ReadonlyArray<T>): boolean;
+export function lensEq<T>(lens: Lens, target: T): (input: ReadonlyArray<T>) => boolean;
 
 /*
 Method: lensSatisfies
@@ -6022,8 +6336,8 @@ Notes: Idea for this method comes from `ramda-adjunct` library
 // @SINGLE_MARKER
 export function lensSatisfies<T, U>(predicate: (x: T) => boolean, lens: Lens, input: U): boolean;
 export function lensSatisfies<T, U>(predicate: (x: T) => boolean, lens: Lens): (input: U) => boolean;
-export function lensSatisfies<T>(predicate: (x: T) => boolean, lens: Lens, input: Array<T>): boolean;
-export function lensSatisfies<T>(predicate: (x: T) => boolean, lens: Lens): (input: Array<T>) => boolean;
+export function lensSatisfies<T>(predicate: (x: T) => boolean, lens: Lens, input: ReadonlyArray<T>): boolean;
+export function lensSatisfies<T>(predicate: (x: T) => boolean, lens: Lens): (input: ReadonlyArray<T>) => boolean;
 
 /*
 Method: viewOr
@@ -6084,8 +6398,8 @@ Notes: Idea for this method comes from `@meltwater/phi` library
 
 */
 // @SINGLE_MARKER
-export function sortByPath<T>(sortPath: Path, list: ReadonlyArray<T>): T[];
-export function sortByPath(sortPath: Path): <T>(list: ReadonlyArray<T>) => T[];
+export function sortByPath<T>(sortPath: Path, list: readonly T[]): readonly T[];
+export function sortByPath(sortPath: Path): <T>(list: readonly T[]) => readonly T[];
 
 /*
 Method: sortByProps
@@ -6117,8 +6431,302 @@ Notes: Idea for this method comes from `@meltwater/phi` library
 
 */
 // @SINGLE_MARKER
-export function sortByProps<T>(sortPaths: string[], list: ReadonlyArray<T>): T[];
-export function sortByProps(sortPaths: string[]): <T>(list: ReadonlyArray<T>) => T[];
+export function sortByProps<T>(sortPaths: readonly string[], list: readonly T[]): readonly T[];
+export function sortByProps(sortPaths: readonly string[]): <T>(list: readonly T[]) => readonly T[];
+
+/*
+Method: removeIndex
+
+Explanation: It returns a copy of `list` input with removed `index`. 
+
+Example:
+
+```
+const list = [1, 2, 3, 4]
+const result = R.removeIndex(1, list)
+// => [1, 3, 4]
+```
+
+Categories: List
+
+Notes: 
+
+*/
+// @SINGLE_MARKER
+export function removeIndex<T>(index: number, list: readonly T[]): readonly T[];
+export function removeIndex(index: number): <T>(list: readonly T[]) => readonly T[];
+
+
+/*
+Method: excludes
+
+Explanation: Opposite of `R.includes`
+
+Example:
+
+```
+const result = [
+  R.excludes('ar', 'foo'),
+  R.excludes({a: 2}, [{a: 1}])
+]
+// => [true, true ]
+```
+
+Categories: List, String
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function excludes(valueToFind: string, input: readonly string[] | string): boolean;
+export function excludes(valueToFind: string): (input: readonly string[] | string) => boolean;
+export function excludes<T>(valueToFind: T, input: readonly T[]): boolean;
+export function excludes<T>(valueToFind: T): (input: readonly T[]) => boolean;
+
+/*
+Method: updateObject
+
+Explanation: Very similar to `R.assocPath` but it applies list of updates instead of only a single update.
+
+It return a copy of `obj` input with changed properties according to `rules` input.
+
+Each instance of `rules` is a tuple of object path and the new value for this path. If such object path does not exist, then such object path is created.
+
+As it uses `R.path` underneath, object path can be either string or array of strings(in Typescript object path can be only a string).
+
+Example:
+
+```
+const obj = {
+  a: {b: 1},
+  foo: {bar: 10},
+}
+const rules = [
+  ['a.b', 2],
+  ['foo.bar', 20],
+  ['q.z', 300],
+]
+const result = R.updateObject(rules, obj)
+
+const expected = {
+  a: {b: 2},
+  foo: {bar: 20},
+  q: {z: 300},
+}
+// => `result` is equal to `expected`
+```
+
+Categories: Object
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function updateObject<Output>(rules: readonly (readonly [string, any])[], input: object): Output;
+export function updateObject<Output>(rules: readonly (readonly [string, any])[]): (input: object) => Output;
+
+/*
+Method: takeUntil
+
+Explanation:
+
+Example:
+
+```
+const list = [1, 2, 3, 4, 5]
+const predicate = x => x > 3
+const result = R.takeUntil(predicate, list)
+
+// => [1, 2, 3]
+```
+
+Categories: List
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function takeUntil<T>(predicate: (x: T) => boolean, list: readonly T[]): readonly T[];
+export function takeUntil<T>(predicate: (x: T) => boolean): (list: readonly T[]) => readonly T[];
+
+/*
+Method: applyDiff
+
+Explanation: It changes paths in an object according to a list of operations. Valid operations are `add`, `update` and `delete`. Its use-case is while writing tests and you need to change the test data.
+
+Note, that you cannot use `update` operation, if the object path is missing in the input object.
+Also, you cannot use `add` operation, if the object path has a value.
+
+Example:
+
+```
+const obj = {a: {b:1, c:2}}
+const rules = [
+  {op: 'remove', path: 'a.c'},
+  {op: 'add', path: 'a.d', value: 4},
+  {op: 'update', path: 'a.b', value: 2},
+]
+const result = R.applyDiff(rules, obj)
+const expected = {a: {b: 2, d: 4}}
+
+// => `result` is equal to `expected`
+```
+
+Categories: List
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function applyDiff<Output>(rules: readonly ApplyDiffRule[], obj: object): Output;
+export function applyDiff<Output>(rules: readonly ApplyDiffRule[]): ( obj: object) => Output;
+
+/*
+Method: mapIndexed
+
+Explanation: Same as `R.map`, but it passes index as second argument to the iterator, when looping over arrays.
+
+Example:
+
+```
+```
+
+Categories: List, Object
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function mapIndexed<T, U>(fn: ObjectIterator<T, U>, iterable: Dictionary<T>): Dictionary<U>;
+export function mapIndexed<T, U>(fn: IndexedIterator<T, U>, iterable: readonly T[]): readonly U[];
+export function mapIndexed<T, U>(fn: IndexedIterator<T, U>): (iterable: readonly T[]) => readonly U[];
+export function mapIndexed<T, U, S>(fn: ObjectIterator<T, U>): (iterable: Dictionary<T>) => Dictionary<U>;
+export function mapIndexed<T>(fn: IndexedIterator<T, T>): (iterable: readonly T[]) => readonly T[];
+export function mapIndexed<T>(fn: IndexedIterator<T, T>, iterable: readonly T[]): readonly T[];
+
+/*
+Method: filterIndexed
+
+Explanation: Same as `R.filter`, but it passes index as second argument to the predicate, when looping over arrays.
+
+Example:
+
+```
+```
+
+Categories: List, Object
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function filterIndexed<T>(predicate: IndexedPredicate<T>): (x: readonly T[]) => readonly T[];
+export function filterIndexed<T>(predicate: IndexedPredicate<T>, x: readonly T[]): readonly T[];
+export function filterIndexed<T, U>(predicate: ObjectPredicate<T>): (x: Dictionary<T>) => Dictionary<T>;
+export function filterIndexed<T>(predicate: ObjectPredicate<T>, x: Dictionary<T>): Dictionary<T>;
+
+/*
+Method: forEachIndexed
+
+Explanation:
+
+Example:
+
+```
+```
+
+Categories:
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function forEachIndexed<T>(fn: IndexedIterator<T, void>, list: readonly T[]): readonly T[];
+export function forEachIndexed<T>(fn: IndexedIterator<T, void>): (list: readonly T[]) => readonly T[];
+export function forEachIndexed<T>(fn: ObjectIterator<T, void>, list: Dictionary<T>): Dictionary<T>;
+export function forEachIndexed<T, U>(fn: ObjectIterator<T, void>): (list: Dictionary<T>) => Dictionary<T>;
+
+/*
+Method: produce
+
+Explanation:
+
+Example:
+
+```
+const result = R.produce()
+// => 
+```
+
+Categories:
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function produce<T>(x: T): T;
+
+/*
+Method: tryCatchAsync
+
+Explanation: It returns function that runs `fn` in `try/catch` block. If there was an error, then `fallback` is used to return the result.
+
+Example:
+
+```
+const x = {foo: 1}
+const fnFoo = async () => x.foo
+const fnBar = async () => x.bar
+
+const result = await Promise.all([
+  R.tryCatchAsync (fnFoo, false)(),
+  R.tryCatchAsync(fnBar, false)()
+])
+// => [1, false]
+```
+
+Categories: Async, Function
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function tryCatchAsync<T>(
+  fn: (input: any) => Promise<T>,
+  fallback: T
+): (input: any) => Promise<T>;
+export function tryCatchAsync<T>(
+  fn: (input: any) => Promise<T>,
+  fallback: (input: any) => Promise<T>,
+): (input: any) => Promise<T>;
+
+export const DELAY: 'RAMBDAX_DELAY';
+
+/*
+Method: xnor
+
+Explanation: Logical XNOR
+
+Example:
+
+```
+const result = [
+  R.xnor(1, 0),
+  R.xnor(0, 1),
+  R.xnor(0, 0),
+  R.xnor(1, 1),
+]
+// => [true, false, false, true]
+```
+
+Categories: Logic
+
+Notes:
+
+*/
+// @SINGLE_MARKER
+export function xnor(x: boolean, y: boolean): boolean;
+export function xnor(y: boolean): (y: boolean) => boolean;
 
 // RAMBDAX_MARKER_END
 // ============================================

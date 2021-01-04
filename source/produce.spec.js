@@ -1,51 +1,30 @@
-import { delay } from './delay'
+import { add, pipe } from '../rambda'
 import { produce } from './produce'
 
-test('async', async () => {
-  const fn = produce({
-    foo : async x => {
-      await delay(100)
+const rules = {
+  a : pipe(add(2), add(3)),
+  b : x => ({ foo : x }),
+  c : {
+    d : add(2),
+    e : add(10),
+  },
+}
 
-      return `${ x }_ZEPPELIN`
-    },
-    bar : inputArgument => inputArgument === 5,
-  })
-  const expected = {
-    foo : 'LED_ZEPPELIN',
-    bar : false,
-  }
+const expected = {
+  a : 6,
+  b : { foo : 1 },
+  c : {
+    d : 3,
+    e : 11,
+  },
+}
 
-  const result = await fn('LED')
+test('happy', () => {
+  const result = produce(rules, 1)
   expect(result).toEqual(expected)
 })
 
-test('async with error', async () => {
-  const fn = produce({
-    foo : async x => {
-      await delay(100)
-      throw new Error(`${ x }_ZEPPELIN`)
-    },
-    bar : inputArgument => inputArgument === 5,
-  })
-
-  try {
-    await fn('LED')
-    expect(1).toBe(2)
-  } catch (e){
-    expect(e.message).toBe('LED_ZEPPELIN')
-  }
-})
-
-test('sync', () => {
-  const fn = produce({
-    foo : x => x + 1,
-    bar : inputArgument => inputArgument === 5,
-  })
-  const expected = {
-    foo : 6,
-    bar : true,
-  }
-
-  const result = fn(5)
+test('curried', () => {
+  const result = produce(rules)(1)
   expect(result).toEqual(expected)
 })

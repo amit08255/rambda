@@ -1,5 +1,41 @@
 import { assocPath } from './assocPath'
 
+test('string can be used as path input', () => {
+  const testObj = {
+    a : [ { b : 1 }, { b : 2 } ],
+    d : 3,
+  }
+  const result = assocPath(
+    'a.0.b', 10, testObj
+  )
+  const expected = {
+    a : [ { b : 10 }, { b : 2 } ],
+    d : 3,
+  }
+  expect(result).toEqual(expected)
+})
+
+test('bug', () => {
+  /*
+    https://github.com/selfrefactor/rambda/issues/524
+  */
+  const state = {}
+
+  const withDateLike = assocPath(
+    [ 'outerProp', '2020-03-10' ],
+    { prop : 2 },
+    state
+  )
+  const withNumber = assocPath(
+    [ 'outerProp', '5' ], { prop : 2 }, state
+  )
+
+  const withDateLikeExpected = { outerProp : { '2020-03-10' : { prop : 2 } } }
+  const withNumberExpected = { outerProp : { 5 : { prop : 2 } } }
+  expect(withDateLike).toEqual(withDateLikeExpected)
+  expect(withNumber).toEqual(withNumberExpected)
+})
+
 test('adds a key to an empty object', () => {
   expect(assocPath(
     [ 'a' ], 1, {}
@@ -49,13 +85,6 @@ test('adds a nested key to a non-empty object - curry case 1', () => {
   expect(assocPath('b.c', 2)({ a : 1 })).toEqual({
     a : 1,
     b : { c : 2 },
-  })
-})
-
-test('adds a nested array to a non-empty object - curry case 1', () => {
-  expect(assocPath('b.0', 2)({ a : 1 })).toEqual({
-    a : 1,
-    b : [ 2 ],
   })
 })
 

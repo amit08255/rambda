@@ -1,12 +1,15 @@
-import { delay } from './delay'
+import { tryCatch as tryCatchRamda } from 'ramda'
+
+import { compareCombinations } from './_internals/testUtils'
 import { prop } from './prop'
 import { tryCatch } from './tryCatch'
 
-test('throws when fn is not function', () => {
-  const fn = 'foo'
-
-  expect(() => tryCatch(fn, false)(null)).toThrowWithMessage(Error,
-    'R.tryCatch | fn \'foo\'')
+test('happy', () => {
+  const fn = () => {
+    throw new Error('foo')
+  }
+  const result = tryCatch(fn, () => true)()
+  expect(result).toBeTrue()
 })
 
 test('when fallback is used', () => {
@@ -19,8 +22,8 @@ test('with json parse', () => {
   const good = () => JSON.parse(JSON.stringify({ a : 1 }))
   const bad = () => JSON.parse('a{a')
 
-  expect(tryCatch(good, 1)(null)).toEqual({ a : 1 })
-  expect(tryCatch(bad, 1)(null)).toBe(1)
+  expect(tryCatch(good, 1)()).toEqual({ a : 1 })
+  expect(tryCatch(bad, 1)()).toBe(1)
 })
 
 test('when fallback is function', () => {
@@ -73,62 +76,51 @@ test('fallback receives error object', () => {
   expect(willThrow([ {}, {}, {} ])).toBe('10')
 })
 
-test('when async + fallback', async () => {
-  let called = false
+const possibleFns = [
+  null,
+  () => 1,
+  () => 0,
+  () => JSON.parse('{a:1'),
+  () => {
+    const x = {}
 
-  const fn = async input => {
-    await delay(input)
-    called = true
+    return x.x
+  },
+  x => x.foo,
+  () => {
+    throw new Error('foo')
+  },
+]
 
-    return JSON.parse('{a:')
-  }
+const possibleCatchers = [
+  null,
+  e => e.message.length,
+  (e, ...inputs) => `${ e.message.length } ${ inputs.length }`,
+  () => {
+    throw new Error('bar')
+  },
+]
 
-  expect(await tryCatch(fn, 'fallback')(100)).toBe('fallback')
-  expect(called).toBeTrue()
-})
+const possibleInputs = [ null, {}, { foo : 1 } ]
 
-test('when async + fallback is function', async () => {
-  let called = false
-
-  const fn = async input => {
-    await delay(input)
-    called = true
-
-    return JSON.parse('{a:')
-  }
-
-  expect(await tryCatch(fn, x => x + 1)(100)).toBe(101)
-  expect(called).toBeTrue()
-})
-
-test('when async + fallback is async', async () => {
-  let called = false
-  const fn = async input => {
-    await delay(input)
-    called = true
-
-    return JSON.parse('{a:')
-  }
-  const fallback = async input => {
-    await delay(10)
-
-    return input + 1
-  }
-
-  expect(await tryCatch(fn, fallback)(100)).toBe(101)
-  expect(called).toBeTrue()
-})
-
-test('when async + fn', async () => {
-  let called = false
-
-  const fn = async input => {
-    await delay(input)
-    called = true
-
-    return input + 1
-  }
-
-  expect(await tryCatch(fn, 'fallback')(100)).toBe(101)
-  expect(called).toBeTrue()
+describe('brute force', () => {
+  compareCombinations({
+    returnsFunctionFlag : true,
+    firstInput          : possibleFns,
+    callback            : errorsCounters => {
+      expect(errorsCounters).toMatchInlineSnapshot(`
+        Object {
+          "ERRORS_MESSAGE_MISMATCH": 0,
+          "ERRORS_TYPE_MISMATCH": 12,
+          "RESULTS_MISMATCH": 0,
+          "SHOULD_NOT_THROW": 0,
+          "SHOULD_THROW": 7,
+        }
+      `)
+    },
+    secondInput : possibleCatchers,
+    thirdInput  : possibleInputs,
+    fn          : tryCatch,
+    fnRamda     : tryCatchRamda,
+  })
 })

@@ -1,18 +1,11 @@
 import { any } from './any'
 
-const arr = [ 1, 2 ]
+const list = [ 1, 2, 3 ]
 
-test('no curry', () => {
-  expect(any(val => val < 0, arr)).toBeFalse()
+test('happy', () => {
+  expect(any(x => x < 0, list)).toBeFalse()
 })
 
 test('with curry', () => {
-  expect(any(val => val < 2)(arr)).toBeTrue()
-})
-
-test('passes index to predicate', () => {
-  any((x, i) => {
-    expect(typeof x).toBe('string')
-    expect(typeof i).toBe('number')
-  })([ 'foo', 'bar' ])
+  expect(any(x => x > 2)(list)).toBeTrue()
 })
