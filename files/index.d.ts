@@ -1,18 +1,14 @@
-import { F as FunctionToolbelt, O as ObjectToolbelt, L as ListToolbelt } from "../_ts-toolbelt/src/ts-toolbelt";
+export type RambdaTypes = "Object" | "Number" | "Boolean" | "String" | "Null" | "Array" | "RegExp" | "NaN" | "Function" | "Undefined" | "Async" | "Promise" | "Symbol";
 
-type RambdaTypes = "Object" | "Number" | "Boolean" | "String" | "Null" | "Array" | "RegExp" | "NaN" | "Function" | "Undefined" | "Async" | "Promise" | "Symbol";
-
-type CommonKeys<T1, T2> = keyof T1 & keyof T2;
-
-type IndexedIterator<T, U> = (x: T, i: number) => U;
-type Iterator<T, U> = (x: T) => U;
-type ObjectIterator<T, U> = (x: T, prop: string, inputObj: Dictionary<T>) => U;
+export type IndexedIterator<T, U> = (x: T, i: number) => U;
+export type Iterator<T, U> = (x: T) => U;
+export type ObjectIterator<T, U> = (x: T, prop: string, inputObj: Dictionary<T>) => U;
 type Ord = number | string | boolean | Date;
 type Path = string | readonly (number | string)[];
 type Predicate<T> = (x: T) => boolean;
-type IndexedPredicate<T> = (x: T, i: number) => boolean;
-type ObjectPredicate<T> = (x: T, prop: string, inputObj: Dictionary<T>) => boolean;
-type RamdaPath = readonly (number | string)[];
+export type IndexedPredicate<T> = (x: T, i: number) => boolean;
+export type ObjectPredicate<T> = (x: T, prop: string, inputObj: Dictionary<T>) => boolean;
+export type RamdaPath = readonly (number | string)[];
 
 type ValueOfRecord<R> =
   R extends Record<any, infer T>
@@ -24,7 +20,7 @@ interface KeyValuePair<K, V> extends Array<K | V> {
   readonly 1: V;
 }
 
-interface Lens {
+export interface Lens {
   <T, U>(obj: T): U;
   set<T, U>(str: string, obj: T): U;
 }
@@ -72,8 +68,6 @@ type EvolveValue<V, E> =
     : E extends Evolver
       ? EvolveNestedValue<V, E>
       : never;
-
-type Merge<O1 extends object, O2 extends object, Depth extends 'flat' | 'deep'> =  ObjectToolbelt.Merge<ListToolbelt.ObjectOf<O1>, ListToolbelt.ObjectOf<O2>, Depth, 1>;
 
 interface AssocPartialOne<K extends keyof any> {
   <T>(val: T): <U>(obj: U) => Record<K, T> & U;
@@ -417,7 +411,7 @@ Example:
 
 ```
 R.assoc('c', 3, {a: 1, b: 2})
-//=> {a: 1, b: 2, c: 3}
+// => {a: 1, b: 2, c: 3}
 ```
 
 Categories: Object
@@ -456,7 +450,7 @@ Notes:
 // @SINGLE_MARKER
 export function assocPath<Output>(path: Path, newValue: any, obj: object): Output;
 export function assocPath<Output>(path: Path, newValue: any): (obj: object) => Output;
-export function assocPath<Output>(path: Path): FunctionToolbelt.Curry<(newValue: any, obj: object) => Output>;
+export function assocPath<Output>(path: Path): (newValue: any) => (obj: object) => Output;
 
 /*
 Method: both
@@ -529,7 +523,7 @@ const result = [
   R.clamp(0, 10, -1),
   R.clamp(0, 10, 11)
 ]
-//=> [5, 0, 10]
+// => [5, 0, 10]
 ```
 
 Categories:
@@ -810,14 +804,11 @@ Else, it returns the first truthy `inputArguments` instance(from left to right).
 Example:
 
 ```
-// With single input argument
 R.defaultTo('foo', 'bar') // => 'bar'
 R.defaultTo('foo', undefined) // => 'foo'
 
-// With multiple input arguments
-R.defaultTo('foo', undefined, null, NaN) // => 'foo'
-R.defaultTo('foo', undefined, 'bar', NaN, 'qux') // => 'bar'
-R.defaultTo('foo', undefined, null, NaN, 'quz') // => 'qux'
+// Important - emtpy string is not falsy value(same as Ramda)
+R.defaultTo('foo', '') // => 'foo'
 ```
 
 Categories: Logic
@@ -826,14 +817,15 @@ Notes: Rambda's **defaultTo** accept indefinite number of arguments when non cur
 
 */
 // @SINGLE_MARKER
-export function defaultTo<T>(defaultValue: T): (...inputArguments: readonly (T | null | undefined)[]) => T;
-export function defaultTo<T>(defaultValue: T, ...inputArguments: readonly (T | null | undefined)[]): T;
-export function defaultTo<T, U>(defaultValue: T | U, ...inputArguments: readonly (T | U | null | undefined)[]): T | U;
+export function defaultTo<T>(defaultValue: T, input: T | null | undefined): T;
+export function defaultTo<T>(defaultValue: T): (input: T | null | undefined) => T;
 
 /*
 Method: difference
 
-Explanation: It returns the uniq set of all elements in the first list `a` not contained in the second list `b`. 
+Explanation: It returns the uniq set of all elements in the first list `a` not contained in the second list `b`.
+
+`R.equals` is used to determine equality.
 
 Example:
 
@@ -863,7 +855,7 @@ Example:
 
 ```
 R.dissoc('b', {a: 1, b: 2, c: 3})
-//=> {a: 1, c: 3}
+// => {a: 1, c: 3}
 ```
 
 Categories: Object
@@ -964,7 +956,7 @@ const result = [
   predicate(8),
   predicate(7),
 ]
-//=> [true, true, false]
+// => [true, true, false]
 ```
 
 Categories: Function
@@ -1217,7 +1209,7 @@ const subtractFlip = R.flip(R.subtract)
 
 const result = [
   subtractFlip(1,7),
-  R.flip(1, 6)
+  R.subtract(1, 6)
 ]  
 // => [6, -6]
 ```
@@ -1229,7 +1221,6 @@ Notes: Rambda's **flip** will throw if the arity of the input function is greate
 */
 // @SINGLE_MARKER
 export function flip<T, U, TResult>(fn: (arg0: T, arg1: U) => TResult): (arg1: U, arg0?: T) => TResult;
-export function flip<F extends (...args: any) => any, P extends FunctionToolbelt.Parameters<F>>(fn: F): FunctionToolbelt.Curry<(...args: ListToolbelt.Merge<readonly [P[1], P[0]], P>) => FunctionToolbelt.Return<F>>;
 
 /*
 Method: forEach
@@ -1244,8 +1235,8 @@ const result = R.forEach(
   x => sideEffect[`foo${x}`] = x
 )([1, 2])
 
-sideEffect //=> {foo1: 1, foo2: 2}
-result //=> [1, 2]
+sideEffect // => {foo1: 1, foo2: 2}
+result // => [1, 2]
 ```
 
 Categories: List, Object
@@ -1284,8 +1275,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function fromPairs<V>(listOfPairs: readonly KeyValuePair<string, V>[]): { readonly [index: string]: V };
-export function fromPairs<V>(listOfPairs: readonly KeyValuePair<number, V>[]): { readonly [index: number]: V };
+export function fromPairs<V>(listOfPairs: readonly (readonly [number, V])[]): { readonly [index: number]: V };
+export function fromPairs<V>(listOfPairs: readonly (readonly [string, V])[]): { readonly [index: string]: V };
 
 /*
 Method: groupBy
@@ -1431,12 +1422,12 @@ Example:
 
 ```
 const obj = {a: 1};
-R.identical(obj, obj); //=> true
-R.identical(1, 1); //=> true
-R.identical(1, '1'); //=> false
-R.identical([], []); //=> false
-R.identical(0, -0); //=> false
-R.identical(NaN, NaN); //=> true
+R.identical(obj, obj); // => true
+R.identical(1, 1); // => true
+R.identical(1, '1'); // => false
+R.identical([], []); // => false
+R.identical(0, -0); // => false
+R.identical(NaN, NaN); // => true
 ```
 
 Categories: Logic
@@ -1661,8 +1652,6 @@ const result = intersection(listA, listB)
 ```
 
 Categories: List
-
-Notes:
 
 */
 // @SINGLE_MARKER
@@ -1941,13 +1930,13 @@ Example:
 const lensPath = R.lensPath(['x', 0, 'y'])
 const input = {x: [{y: 2, z: 3}, {y: 4, z: 5}]}
 
-R.view(lensPath, input) //=> 2
+R.view(lensPath, input) // => 2
 
 R.set(lensPath, 1, input) 
-//=> {x: [{y: 1, z: 3}, {y: 4, z: 5}]}
+// => {x: [{y: 1, z: 3}, {y: 4, z: 5}]}
 
 R.over(xHeadYLens, R.negate, input) 
-//=> {x: [{y: -2, z: 3}, {y: 4, z: 5}]}
+// => {x: [{y: -2, z: 3}, {y: 4, z: 5}]}
 ```
 
 Categories: Lenses
@@ -2000,7 +1989,7 @@ Example:
 ```
 const headLens = R.lensIndex(0)
  
-R.over(headLens, R.toUpper, ['foo', 'bar', 'baz']) //=> ['FOO', 'bar', 'baz']
+R.over(headLens, R.toUpper, ['foo', 'bar', 'baz']) // => ['FOO', 'bar', 'baz']
 ```
 
 Categories: Lenses
@@ -2027,8 +2016,8 @@ Example:
 const input = {x: 1, y: 2}
 const xLens = R.lensProp('x')
 
-R.set(xLens, 4, input) //=> {x: 4, y: 2}
-R.set(xLens, 8, input) //=> {x: 8, y: 2}
+R.set(xLens, 4, input) // => {x: 4, y: 2}
+R.set(xLens, 8, input) // => {x: 8, y: 2}
 
 ```
 
@@ -2052,8 +2041,8 @@ Example:
 ```
 const lens = R.lensProp('x')
 
-R.view(lens, {x: 1, y: 2}) //=> 1
-R.view(lens, {x: 4, y: 2}) //=> 4
+R.view(lens, {x: 1, y: 2}) // => 1
+R.view(lens, {x: 4, y: 2}) // => 4
 ```
 
 Categories: Lenses
@@ -2198,7 +2187,7 @@ Notes:
 // @SINGLE_MARKER
 export function maxBy<T>(compareFn: (input: T) => Ord, x: T, y: T): T;
 export function maxBy<T>(compareFn: (input: T) => Ord, x: T): (y: T) => T;
-export function maxBy<T>(compareFn: (input: T) => Ord): FunctionToolbelt.Curry<(x: T, y: T) => T>;
+export function maxBy<T>(compareFn: (input: T) => Ord): (x: T) => (y: T) => T;
 
 /*
 Method: mean
@@ -2260,8 +2249,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function merge<O1 extends object, O2 extends object>(target: O1, newProps: O2): Merge<O2, O1, 'flat'>;
-export function merge<O1 extends object>(target: O1): <O2 extends object>(newProps: O2) => Merge<O2, O1, 'flat'>;
+export function merge<Output>(target: object, newProps: object): Output;
+export function merge<Output>(target: object): (newProps: object) => Output;
 
 /*
 Method: mergeAll
@@ -2319,8 +2308,8 @@ Notes: Explanation and example are taken from `Ramda` documentation.
 
 */
 // @SINGLE_MARKER
-export function mergeDeepRight<O1 extends object, O2 extends object>(x: O1, y: O2): Merge<O2, O1, 'deep'>;
-export function mergeDeepRight<O1 extends object>(x: O1): <O2 extends object>(y: O2) => Merge<O2, O1, 'deep'>;
+export function mergeDeepRight<Output>(target: object, newProps: object): Output;
+export function mergeDeepRight<Output>(target: object): (newProps: object) => Output;
 
 
 /*
@@ -2344,8 +2333,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function mergeLeft<O1 extends object, O2 extends object>(target: O1, newProps: O2): Merge<O2, O1, 'flat'>;
-export function mergeLeft<O1 extends object>(target: O1): <O2 extends object>(newProps: O2) => Merge<O2, O1, 'flat'>;
+export function mergeLeft<Output>(newProps: object, target: object): Output;
+export function mergeLeft<Output>(newProps: object): (target: object) => Output;
 
 /*
 Method: min
@@ -2392,7 +2381,7 @@ Notes:
 // @SINGLE_MARKER
 export function minBy<T>(compareFn: (input: T) => Ord, x: T, y: T): T;
 export function minBy<T>(compareFn: (input: T) => Ord, x: T): (y: T) => T;
-export function minBy<T>(compareFn: (input: T) => Ord): FunctionToolbelt.Curry<(x: T, y: T) => T>;
+export function minBy<T>(compareFn: (input: T) => Ord): (x: T) => (y: T) => T;
 
 
 /*
@@ -2554,6 +2543,27 @@ export function nth<T>(index: number, list: readonly T[]): T | undefined;
 export function nth(index: number): <T>(list: readonly T[]) => T | undefined;
 
 /*
+Method: objOf
+
+Explanation: It returns a new object with the provided key and value.
+
+Example:
+
+```
+const result = [
+  R.objOf('foo', 42),
+  R.objOf(null, undefined),
+]
+// => [{foo: 42}, {null: undefined}]
+```
+
+Categories: Object
+*/
+// @SINGLE_MARKER
+export function objOf<T, K extends string>(key: K, value: T): Record<K, T>;
+export function objOf<K extends string>(key: K): <T>(value: T) => Record<K, T>;
+
+/*
 Method: once
 
 Explanation: It returns a function, which invokes only once `fn` function.
@@ -2617,8 +2627,8 @@ Explanation:
 Example:
 
 ```
-R.of(null); //=> [null]
-R.of([42]); //=> [[42]]
+R.of(null); // => [null]
+R.of([42]); // => [[42]]
 ```
 
 Categories:
@@ -2773,7 +2783,7 @@ Notes:
 // @SINGLE_MARKER
 export function pathEq(pathToSearch: Path, target: any, input: any): boolean;
 export function pathEq(pathToSearch: Path, target: any): (input: any) => boolean;
-export function pathEq(pathToSearch: Path): FunctionToolbelt.Curry<(a: any, b: any) => boolean>;
+export function pathEq(pathToSearch: Path): (target: any) => (input: any) => boolean;
 
 /*
 Method: paths
@@ -2847,7 +2857,7 @@ Notes:
 // @SINGLE_MARKER
 export function pathOr<T>(defaultValue: T, pathToSearch: Path, obj: any): T;
 export function pathOr<T>(defaultValue: T, pathToSearch: Path): (obj: any) => T;
-export function pathOr<T>(defaultValue: T): FunctionToolbelt.Curry<(a: Path, b: any) => T>;
+export function pathOr<T>(defaultValue: T): (pathToSearch: Path) => (obj: any) => T;
 
 /*
 Method: pick
@@ -3169,7 +3179,7 @@ Example:
 const list = [{a: 1}, {a: 2}, {b: 3}]
 const property = 'a'
 
-R.pluck(list, property) 
+R.pluck(property, list) 
 // => [1, 2]
 ```
 
@@ -3731,7 +3741,9 @@ export function sum(list: readonly number[]): number;
 /*
 Method: symmetricDifference
 
-Explanation: It returns a merged list of `x` and `y` with all equal elements removed. 
+Explanation: It returns a merged list of `x` and `y` with all equal elements removed.
+
+`R.equals` is used to determine equality.
 
 Example:
 
@@ -3745,7 +3757,7 @@ const result = symmetricDifference(x, y)
 
 Categories: List
 
-Notes: `R.equals` is used to determine equality, i.e. it can be safely used with list of objects.
+Notes:
 
 */
 // @SINGLE_MARKER
@@ -3924,7 +3936,7 @@ const fn = x => x * 2
 const howMany = 5
 
 R.times(fn, howMany)
-//=> [0, 2, 4, 6, 8]
+// => [0, 2, 4, 6, 8]
 ```
 
 Categories:
@@ -4147,13 +4159,13 @@ Method: union
 
 Explanation: It takes two lists and return a new list containing a merger of both list with removed duplicates. 
 
-`R.equals` is used to compare for duplication, which means that it can be safely used with array of objects.
+`R.equals` is used to compare for duplication.
 
 Example:
 
 ```
 const result = R.union([1,2,3], [3,4,5]);
-//=> [1, 2, 3, 4, 5]
+// => [1, 2, 3, 4, 5]
 ```
 
 Categories: List
@@ -4170,6 +4182,8 @@ Method: uniq
 
 Explanation: It returns a new array containing only one copy of each element of `list`.
 
+`R.equals` is used to determine equality.
+
 Example:
 
 ```
@@ -4181,7 +4195,7 @@ R.uniq(list)
 
 Categories: List
 
-Notes: `R.equals` is used to determine equality
+Notes:
 
 */
 // @SINGLE_MARKER
@@ -4190,7 +4204,9 @@ export function uniq<T>(list: readonly T[]): readonly T[];
 /*
 Method: uniqWith
 
-Explanation: It returns a new array containing only one copy of each element in `list` according to boolean returning function `uniqFn`.
+Explanation: It returns a new array containing only one copy of each element in `list` according to `predicate` function.
+
+This predicate should return true, if two elements are equal.
 
 Example:
 
@@ -4209,9 +4225,9 @@ const expected = [
   {id: 2, title:'baz'},
 ]
 
-const uniqFn = (x,y) => x.title === y.title
+const predicate = (x,y) => x.title === y.title
 
-const result = R.uniqWith(uniqFn, list)
+const result = R.uniqWith(predicate, list)
 // => `result` is equal to `expected`
 ```
 
@@ -4221,8 +4237,8 @@ Notes:
 
 */
 // @SINGLE_MARKER
-export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean, list: readonly T[]): readonly T[];
-export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean): (list: readonly T[]) => readonly T[];
+export function uniqWith<T, U>(predicate: (x: T, y: T) => boolean, list: readonly T[]): readonly T[];
+export function uniqWith<T, U>(predicate: (x: T, y: T) => boolean): (list: readonly T[]) => readonly T[];
 
 /*
 Method: unless
@@ -4340,12 +4356,14 @@ Notes:
 // @SINGLE_MARKER
 export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U, input: T): T | U;
 export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U): (input: T) => T | U;
-export function when<T, U>(predicate: (x: T) => boolean): FunctionToolbelt.Curry<(whenTrueFn: (a: T) => U, input: T) => T | U>;
+export function when<T, U>(predicate: (x: T) => boolean): ((whenTrueFn: (a: T) => U) => (input: T) => T | U);
 
 /*
 Method: where
 
 Explanation: It returns `true` if all each property in `conditions` returns `true` when applied to corresponding property in `input` object.
+
+`R.equals` is used to determine equality.
 
 Example:
 
@@ -4380,6 +4398,8 @@ Method: whereEq
 
 Explanation: It will return `true` if all of `input` object fully or partially include `rule` object.
 
+`R.equals` is used to determine equality.
+
 Example:
 
 ```
@@ -4390,7 +4410,7 @@ const input = {
 }
 
 const result = whereEq(condition, input)
-//=> true
+// => true
 ```
 
 Categories: Object
@@ -4407,6 +4427,8 @@ Method: without
 
 Explanation: It will return a new array, based on all members of `source` list that are not part of `matchAgainst` list.
 
+`R.equals` is used to determine equality.
+
 Example:
 
 ```
@@ -4419,7 +4441,7 @@ const result = R.without(matchAgainst, source)
 
 Categories: List
 
-Notes: `R.equals` is used to determine equality
+Notes:
 
 */
 // @SINGLE_MARKER
@@ -4491,11 +4513,11 @@ Example:
 const keys = ['a', 'b', 'c']
 
 R.zipObj(keys, [1, 2, 3])
-//=> {a: 1, b: 2, c: 3}
+// => {a: 1, b: 2, c: 3}
 
 // truncates to shortest list
 R.zipObj(keys, [1, 2])
-//=> {a: 1, b: 2}
+// => {a: 1, b: 2}
 ```
 
 Categories: List
@@ -4802,8 +4824,6 @@ export function takeWhile<T>(fn: Predicate<T>): (iterable: readonly T[]) => read
 Method: eqProps
 
 Explanation: It returns `true` if property `prop` in `obj1` is equal to property `prop` in `obj2` according to `R.equals`.
-
-
 
 Example:
 
@@ -5424,7 +5444,7 @@ Notes: Independently, somebody else came with very similar idea called [superstr
 
 */
 // @SINGLE_MARKER
-export function isValid({input: object, schema: Schema}): boolean;
+export function isValid({input: object, schema: Schema}: IsValid): boolean;
 
 /*
 Method: isValidAsync
@@ -5842,7 +5862,14 @@ Notes: Independently, similar method is implemented in `Ramada` library, but the
 
 */
 // @SINGLE_MARKER
-export function piped<T>(input: any, ...fnList: readonly Func<any>[]): T;
+export function piped<A, B>(input: A, fn0: (x: A) => B) : B;
+export function piped<A, B, C>(input: A, fn0: (x: A) => B, fn1: (x: B) => C) : C;
+export function piped<A, B, C, D>(input: A, fn0: (x: A) => B, fn1: (x: B) => C, fn2: (x: C) => D) : D;
+export function piped<A, B, C, D, E>(input: A, fn0: (x: A) => B, fn1: (x: B) => C, fn2: (x: C) => D, fn3: (x: D) => E) : E;
+export function piped<A, B, C, D, E, F>(input: A, fn0: (x: A) => B, fn1: (x: B) => C, fn2: (x: C) => D, fn3: (x: D) => E, fn4: (x: E) => F) : F;
+export function piped<A, B, C, D, E, F, G>(input: A, fn0: (x: A) => B, fn1: (x: B) => C, fn2: (x: C) => D, fn3: (x: D) => E, fn4: (x: E) => F, fn5: (x: F) => G) : G;
+export function piped<A, B, C, D, E, F, G, H>(input: A, fn0: (x: A) => B, fn1: (x: B) => C, fn2: (x: C) => D, fn3: (x: D) => E, fn4: (x: E) => F, fn5: (x: F) => G, fn6: (x: G) => H) : H;
+export function piped<A, B, C, D, E, F, G, H, I>(input: A, fn0: (x: A) => B, fn1: (x: B) => C, fn2: (x: C) => D, fn3: (x: D) => E, fn4: (x: E) => F, fn5: (x: F) => G, fn6: (x: G) => H, fn7: (x: H) => I) : I;
 
 /*
 Method: pipedAsync
@@ -6113,6 +6140,8 @@ The method return a value if the matched option is a value.
 
 If the matched option is a function, then `R.switcher` returns a function which expects input. Tests of the method explain it better than this short description.
 
+`R.equals` is used to determine equality.
+
 Example:
 
 ```
@@ -6367,7 +6396,8 @@ Notes: Idea for this method comes from `@meltwater/phi` library
 // @SINGLE_MARKER
 export function viewOr<Input, Output>(fallback: Output, lens: Lens, input: Input): Output;
 export function viewOr<Input, Output>(fallback: Output, lens: Lens): (input: Input) =>  Output;
-export function viewOr<Input, Output>(fallback: Output): FunctionToolbelt.Curry<(lens: Lens, input: Input) => Output>;
+export function viewOr<Input, Output>(fallback: Output): (lens: Lens) => (input: Input) =>  Output;
+
 /*
 Method: sortByPath
 
@@ -6461,6 +6491,8 @@ export function removeIndex(index: number): <T>(list: readonly T[]) => readonly 
 Method: excludes
 
 Explanation: Opposite of `R.includes`
+
+`R.equals` is used to determine equality.
 
 Example:
 
@@ -6645,26 +6677,6 @@ export function forEachIndexed<T>(fn: IndexedIterator<T, void>, list: readonly T
 export function forEachIndexed<T>(fn: IndexedIterator<T, void>): (list: readonly T[]) => readonly T[];
 export function forEachIndexed<T>(fn: ObjectIterator<T, void>, list: Dictionary<T>): Dictionary<T>;
 export function forEachIndexed<T, U>(fn: ObjectIterator<T, void>): (list: Dictionary<T>) => Dictionary<T>;
-
-/*
-Method: produce
-
-Explanation:
-
-Example:
-
-```
-const result = R.produce()
-// => 
-```
-
-Categories:
-
-Notes:
-
-*/
-// @SINGLE_MARKER
-export function produce<T>(x: T): T;
 
 /*
 Method: tryCatchAsync

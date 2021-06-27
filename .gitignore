@@ -1,10 +1,4 @@
-dist
 .idea
 *.log
 coverage
 node_modules
-scripts/run-ramda-specs/ramda
-scripts/run-ramda-specs/ramda/*
-scripts/dynamic-ts-toolbelt/ts-toolbelt
-scripts/populate-docs-data/*.json
-scripts/run-benchmarks/benchmarks/*.json

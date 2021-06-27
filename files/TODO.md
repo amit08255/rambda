@@ -1,10 +1,18 @@
-## Uncommited changelog
+## Add lint staged
 
-R.produceAsync returns promise even if all rules are synchronous.
+npm version 6.7.0-beta.0
 
-## Blacklist methods
+npm publish --tag beta
 
-Methods such as compose, curryN doesn't need anything more than description and example. This should keep size of docs smaller.
+## Dictionary - type vs interface
+
+https://github.com/selfrefactor/rambda/issues/459#issuecomment-771519978
+
+## R.resolve
+
+https://github.com/verydanny/vcslack/blob/master/src/api.ts
+
+## update repl
 
 ## isValid with functions
 
@@ -25,13 +33,7 @@ ok(repos)([x => {
     }])
 ```
 
-## Export types
-
-Also check other questions from the last issue.
-
-## Readme limit
-
-Exit build process if README.md is larger than 500kB. Also check what difference make if separator is removed.
+## Update https://github.com/selfrefactor/rambda-tree-shaking
 
 ## typings of last and head
 
@@ -44,6 +46,13 @@ const parse = pipe(split('.'), last) is correct
 ## Wrong use of releases
 
 Use github CLI as it offers API to make a release
+
+## Deno info
+
+To use directly in [Deno](https://deno.land):
+```javascript
+import * as R from "https://deno.land/x/rambda/rambda.js";
+```
 
 ## Other
 
@@ -79,6 +88,20 @@ includeLens?
 
 ## Can postpone
 
+### Alternative pipeAsync Typings
+
+### deprecate R.renameProps in favour of https://jmlweb.github.io/ramdu/global.html#evolveKeys
+
+### Maybe https://github.com/13d-io/maybe-just-maybe
+
+### Faster isObject?
+
+https://github.com/neotan/simda/blob/master/src/internal/_isObject.js
+
+---
+
+https://github.com/MartinPavlik/ramda-async/blob/master/index.ts
+
 - R.mapKeys (name inspiration from https://github.com/AlexGalays/spacelift#objectmapvalues)
 
 fetch contributors github's avatars
@@ -106,7 +129,7 @@ R.map sanity check is different than R.filter - fixable with global change of wr
 ## Holder
 
 ```
-test('happy', () => {
+test('happy', () => {https://github.com/MartinPavlik/ramda-async/blob/master/index.ts
   class Foo{
     constructor(){
       this.obj = {}

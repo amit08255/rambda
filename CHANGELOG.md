@@ -1,20 +1,73 @@
-WIP 6.6.0
+6.7.1
+
+- Fix `R.intersection` wrong order compared to Ramda.
+
+- `R.path` wrong return of `null` instead of `undefined` when path value is `null` - [PR #577](https://github.com/selfrefactor/rambda/pull/577)
+
+- Expose `non-strict.ts` typings which are Rambda typings without `readonly` statements - [Issue #565](https://github.com/selfrefactor/rambda/issues/565)
+
+6.7.0
+
+- Remove `ts-toolbelt` types from Typescript definitions. Most affected are the following methods, which lose one of its curried definitions:
+
+1. R.maxBy
+2. R.minBy
+3. R.pathEq
+4. R.viewOr
+5. R.when
+6. R.merge
+7. R.mergeDeepRight
+8. R.mergeLeft
+
+6.6.0
+
+- Change `R.piped` typings to mimic that of `R.pipe`. Main difference is that `R.pipe` is focused on unary functions.
+
+- Fix wrong logic when `R.without` use `R.includes` while it should use array version of `R.includes`.
+
+- Use uglify plugin for UMD bundle.
+
+- Remove `dist` folder from `.gitignore` in order to fix `Deno` broken package. [Issue #570](https://github.com/selfrefactor/rambda/issues/570)
+
+- Improve `R.fromPairs` typings - [Issue #567](https://github.com/selfrefactor/rambda/issues/567)
+
+6.5.3
+
+- Wrong logic where `R.without` use `R.includes` while it should use the array version of `R.includes`
+
+This is Ramda bug, that Rambda also has before this release - https://github.com/ramda/ramda/issues/3086
+
+6.5.2
+
+- Wrong `R.defaultTo` typings - changes introduced in v6.5.0 are missing their TS equivalent.
+
+- Update dependencies
+
+6.5.1
+
+Fix wrong versions in changelog
+
+6.5.0
+
+- `R.defaultTo` no longer accepts infinite inputs, thus it follows Ramda implementation.
 
 - `R.equals` supports equality of functions.
+
+- `R.pipe` doesn't use `R.compose`.
+
+- Close [Issue #561](https://github.com/selfrefactor/rambda/issues/561) - export several internal TS interfaces and types
 
 - Close [Issue #559](https://github.com/selfrefactor/rambda/issues/559) - improve `R.propOr` typings
 
 - Add `CHANGELOG.md` file in release files list
 
-6.5.0
+6.4.0
 
 - Close [Issue #560](https://github.com/selfrefactor/rambda/issues/560) - apply immutable lint to Typescript definitions
 
 - Close [Issue #553](https://github.com/selfrefactor/rambda/issues/553) - fix problem with curried typings of `R.prop`
 
 - Fix wrong `R.last` typing
-
-6.4.0
 
 - Upgrade all `rollup` related dependencies
 

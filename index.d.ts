@@ -1,18 +1,14 @@
-import { F as FunctionToolbelt, O as ObjectToolbelt, L as ListToolbelt } from "./_ts-toolbelt/src/ts-toolbelt";
+export type RambdaTypes = "Object" | "Number" | "Boolean" | "String" | "Null" | "Array" | "RegExp" | "NaN" | "Function" | "Undefined" | "Async" | "Promise" | "Symbol";
 
-type RambdaTypes = "Object" | "Number" | "Boolean" | "String" | "Null" | "Array" | "RegExp" | "NaN" | "Function" | "Undefined" | "Async" | "Promise" | "Symbol";
-
-type CommonKeys<T1, T2> = keyof T1 & keyof T2;
-
-type IndexedIterator<T, U> = (x: T, i: number) => U;
-type Iterator<T, U> = (x: T) => U;
-type ObjectIterator<T, U> = (x: T, prop: string, inputObj: Dictionary<T>) => U;
+export type IndexedIterator<T, U> = (x: T, i: number) => U;
+export type Iterator<T, U> = (x: T) => U;
+export type ObjectIterator<T, U> = (x: T, prop: string, inputObj: Dictionary<T>) => U;
 type Ord = number | string | boolean | Date;
 type Path = string | readonly (number | string)[];
 type Predicate<T> = (x: T) => boolean;
-type IndexedPredicate<T> = (x: T, i: number) => boolean;
-type ObjectPredicate<T> = (x: T, prop: string, inputObj: Dictionary<T>) => boolean;
-type RamdaPath = readonly (number | string)[];
+export type IndexedPredicate<T> = (x: T, i: number) => boolean;
+export type ObjectPredicate<T> = (x: T, prop: string, inputObj: Dictionary<T>) => boolean;
+export type RamdaPath = readonly (number | string)[];
 
 type ValueOfRecord<R> =
   R extends Record<any, infer T>
@@ -24,7 +20,7 @@ interface KeyValuePair<K, V> extends Array<K | V> {
   readonly 1: V;
 }
 
-interface Lens {
+export interface Lens {
   <T, U>(obj: T): U;
   set<T, U>(str: string, obj: T): U;
 }
@@ -35,7 +31,7 @@ type Arity2Fn = (x: any, y: any) => any;
 type Pred = (...x: readonly any[]) => boolean;
 type SafePred<T> = (...x: readonly T[]) => boolean;
 
-interface Dictionary<T> {readonly [index: string]: T}
+export interface Dictionary<T> {readonly [index: string]: T}
 type Partial<T> = { readonly [P in keyof T]?: T[P]};
 
 type Evolvable<E extends Evolver> = { readonly
@@ -72,8 +68,6 @@ type EvolveValue<V, E> =
     : E extends Evolver
       ? EvolveNestedValue<V, E>
       : never;
-
-type Merge<O1 extends object, O2 extends object, Depth extends 'flat' | 'deep'> =  ObjectToolbelt.Merge<ListToolbelt.ObjectOf<O1>, ListToolbelt.ObjectOf<O2>, Depth, 1>;
 
 interface AssocPartialOne<K extends keyof any> {
   <T>(val: T): <U>(obj: U) => Record<K, T> & U;
@@ -216,7 +210,7 @@ export function assoc<K extends string>(prop: K): AssocPartialOne<K>;
  */
 export function assocPath<Output>(path: Path, newValue: any, obj: object): Output;
 export function assocPath<Output>(path: Path, newValue: any): (obj: object) => Output;
-export function assocPath<Output>(path: Path): FunctionToolbelt.Curry<(newValue: any, obj: object) => Output>;
+export function assocPath<Output>(path: Path): (newValue: any) => (obj: object) => Output;
 
 /**
  * It returns a function with `input` argument.
@@ -348,12 +342,13 @@ export function dec(x: number): number;
  * 
  * Else, it returns the first truthy `inputArguments` instance(from left to right).
  */
-export function defaultTo<T>(defaultValue: T): (...inputArguments: readonly (T | null | undefined)[]) => T;
-export function defaultTo<T>(defaultValue: T, ...inputArguments: readonly (T | null | undefined)[]): T;
-export function defaultTo<T, U>(defaultValue: T | U, ...inputArguments: readonly (T | U | null | undefined)[]): T | U;
+export function defaultTo<T>(defaultValue: T, input: T | null | undefined): T;
+export function defaultTo<T>(defaultValue: T): (input: T | null | undefined) => T;
 
 /**
  * It returns the uniq set of all elements in the first list `a` not contained in the second list `b`.
+ * 
+ * `R.equals` is used to determine equality.
  */
 export function difference<T>(a: readonly T[], b: readonly T[]): readonly T[];
 export function difference<T>(a: readonly T[]): (b: readonly T[]) => readonly T[];
@@ -460,7 +455,6 @@ export function flatten<T>(list: readonly any[]): readonly T[];
  * It returns function which calls `fn` with exchanged first and second argument.
  */
 export function flip<T, U, TResult>(fn: (arg0: T, arg1: U) => TResult): (arg1: U, arg0?: T) => TResult;
-export function flip<F extends (...args: any) => any, P extends FunctionToolbelt.Parameters<F>>(fn: F): FunctionToolbelt.Curry<(...args: ListToolbelt.Merge<readonly [P[1], P[0]], P>) => FunctionToolbelt.Return<F>>;
 
 /**
  * It applies `iterable` function over all members of `list` and returns `list`.
@@ -473,8 +467,8 @@ export function forEach<T, U>(fn: ObjectIterator<T, void>): (list: Dictionary<T>
 /**
  * It transforms a `listOfPairs` to an object.
  */
-export function fromPairs<V>(listOfPairs: readonly KeyValuePair<string, V>[]): { readonly [index: string]: V };
-export function fromPairs<V>(listOfPairs: readonly KeyValuePair<number, V>[]): { readonly [index: number]: V };
+export function fromPairs<V>(listOfPairs: readonly (readonly [number, V])[]): { readonly [index: number]: V };
+export function fromPairs<V>(listOfPairs: readonly (readonly [string, V])[]): { readonly [index: string]: V };
 
 /**
  * It splits `list` according to a provided `groupFn` function and returns an object.
@@ -732,7 +726,7 @@ export function max<T extends Ord>(x: T): (y: T) => T;
  */
 export function maxBy<T>(compareFn: (input: T) => Ord, x: T, y: T): T;
 export function maxBy<T>(compareFn: (input: T) => Ord, x: T): (y: T) => T;
-export function maxBy<T>(compareFn: (input: T) => Ord): FunctionToolbelt.Curry<(x: T, y: T) => T>;
+export function maxBy<T>(compareFn: (input: T) => Ord): (x: T) => (y: T) => T;
 
 /**
  * It returns the mean value of `list` input.
@@ -747,8 +741,8 @@ export function median(list: readonly number[]): number;
 /**
  * It creates a copy of `target` object with overidden `newProps` properties.
  */
-export function merge<O1 extends object, O2 extends object>(target: O1, newProps: O2): Merge<O2, O1, 'flat'>;
-export function merge<O1 extends object>(target: O1): <O2 extends object>(newProps: O2) => Merge<O2, O1, 'flat'>;
+export function merge<Output>(target: object, newProps: object): Output;
+export function merge<Output>(target: object): (newProps: object) => Output;
 
 /**
  * It merges all objects of `list` array sequentially and returns the result.
@@ -762,14 +756,14 @@ export function mergeAll(list: readonly object[]): object;
  * - and both values are objects, the two values will be recursively merged
  * - otherwise the value from the second object will be used.
  */
-export function mergeDeepRight<O1 extends object, O2 extends object>(x: O1, y: O2): Merge<O2, O1, 'deep'>;
-export function mergeDeepRight<O1 extends object>(x: O1): <O2 extends object>(y: O2) => Merge<O2, O1, 'deep'>;
+export function mergeDeepRight<Output>(target: object, newProps: object): Output;
+export function mergeDeepRight<Output>(target: object): (newProps: object) => Output;
 
 /**
  * Same as `R.merge`, but in opposite direction.
  */
-export function mergeLeft<O1 extends object, O2 extends object>(target: O1, newProps: O2): Merge<O2, O1, 'flat'>;
-export function mergeLeft<O1 extends object>(target: O1): <O2 extends object>(newProps: O2) => Merge<O2, O1, 'flat'>;
+export function mergeLeft<Output>(newProps: object, target: object): Output;
+export function mergeLeft<Output>(newProps: object): (target: object) => Output;
 
 /**
  * It returns the lesser value between `x` and `y`.
@@ -782,7 +776,7 @@ export function min<T extends Ord>(x: T): (y: T) => T;
  */
 export function minBy<T>(compareFn: (input: T) => Ord, x: T, y: T): T;
 export function minBy<T>(compareFn: (input: T) => Ord, x: T): (y: T) => T;
-export function minBy<T>(compareFn: (input: T) => Ord): FunctionToolbelt.Curry<(x: T, y: T) => T>;
+export function minBy<T>(compareFn: (input: T) => Ord): (x: T) => (y: T) => T;
 
 /**
  * Curried version of `x%y`.
@@ -824,6 +818,12 @@ export function not(input: any): boolean;
  */
 export function nth<T>(index: number, list: readonly T[]): T | undefined;	
 export function nth(index: number): <T>(list: readonly T[]) => T | undefined;
+
+/**
+ * It returns a new object with the provided key and value.
+ */
+export function objOf<T, K extends string>(key: K, value: T): Record<K, T>;
+export function objOf<K extends string>(key: K): <T>(value: T) => Record<K, T>;
 
 /**
  * It returns a function, which invokes only once `fn` function.
@@ -891,7 +891,7 @@ export function path<Input, T>(pathToSearch: Path): (obj: Input) => T | undefine
  */
 export function pathEq(pathToSearch: Path, target: any, input: any): boolean;
 export function pathEq(pathToSearch: Path, target: any): (input: any) => boolean;
-export function pathEq(pathToSearch: Path): FunctionToolbelt.Curry<(a: any, b: any) => boolean>;
+export function pathEq(pathToSearch: Path): (target: any) => (input: any) => boolean;
 
 /**
  * It loops over members of `pathsToSearch` as `singlePath` and returns the array produced by `R.path(singlePath, obj)`.
@@ -908,7 +908,7 @@ export function paths<T>(pathsToSearch: readonly Path[]): (obj: any) => readonly
  */
 export function pathOr<T>(defaultValue: T, pathToSearch: Path, obj: any): T;
 export function pathOr<T>(defaultValue: T, pathToSearch: Path): (obj: any) => T;
-export function pathOr<T>(defaultValue: T): FunctionToolbelt.Curry<(a: Path, b: any) => T>;
+export function pathOr<T>(defaultValue: T): (pathToSearch: Path) => (obj: any) => T;
 
 /**
  * It returns a partial copy of an `input` containing only `propsToPick` properties.
@@ -1272,6 +1272,8 @@ export function sum(list: readonly number[]): number;
 
 /**
  * It returns a merged list of `x` and `y` with all equal elements removed.
+ * 
+ * `R.equals` is used to determine equality.
  */
 export function symmetricDifference<T>(x: readonly T[], y: readonly T[]): readonly T[];
 export function symmetricDifference<T>(x: readonly T[]): <T>(y: readonly T[]) => readonly T[];
@@ -1369,21 +1371,25 @@ export function type(x: any): RambdaTypes;
 /**
  * It takes two lists and return a new list containing a merger of both list with removed duplicates.
  * 
- * `R.equals` is used to compare for duplication, which means that it can be safely used with array of objects.
+ * `R.equals` is used to compare for duplication.
  */
 export function union<T>(x: readonly T[], y: readonly T[]): readonly T[];
 export function union<T>(x: readonly T[]): (y: readonly T[]) => readonly T[];
 
 /**
  * It returns a new array containing only one copy of each element of `list`.
+ * 
+ * `R.equals` is used to determine equality.
  */
 export function uniq<T>(list: readonly T[]): readonly T[];
 
 /**
- * It returns a new array containing only one copy of each element in `list` according to boolean returning function `uniqFn`.
+ * It returns a new array containing only one copy of each element in `list` according to `predicate` function.
+ * 
+ * This predicate should return true, if two elements are equal.
  */
-export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean, list: readonly T[]): readonly T[];
-export function uniqWith<T, U>(uniqFn: (x: T, y: T) => boolean): (list: readonly T[]) => readonly T[];
+export function uniqWith<T, U>(predicate: (x: T, y: T) => boolean, list: readonly T[]): readonly T[];
+export function uniqWith<T, U>(predicate: (x: T, y: T) => boolean): (list: readonly T[]) => readonly T[];
 
 /**
  * The method returns function that will be called with argument `input`.
@@ -1408,10 +1414,12 @@ export function values<T extends object, K extends keyof T>(obj: T): readonly T[
 
 export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U, input: T): T | U;
 export function when<T, U>(predicate: (x: T) => boolean, whenTrueFn: (a: T) => U): (input: T) => T | U;
-export function when<T, U>(predicate: (x: T) => boolean): FunctionToolbelt.Curry<(whenTrueFn: (a: T) => U, input: T) => T | U>;
+export function when<T, U>(predicate: (x: T) => boolean): ((whenTrueFn: (a: T) => U) => (input: T) => T | U);
 
 /**
  * It returns `true` if all each property in `conditions` returns `true` when applied to corresponding property in `input` object.
+ * 
+ * `R.equals` is used to determine equality.
  */
 export function where<T, U>(conditions: T, input: U): boolean;
 export function where<T>(conditions: T): <U>(input: U) => boolean;
@@ -1420,12 +1428,16 @@ export function where<ObjFunc2>(conditions: ObjFunc2): <U>(input: U) => boolean;
 
 /**
  * It will return `true` if all of `input` object fully or partially include `rule` object.
+ * 
+ * `R.equals` is used to determine equality.
  */
 export function whereEq<T, U>(condition: T, input: U): boolean;
 export function whereEq<T>(condition: T): <U>(input: U) => boolean;
 
 /**
  * It will return a new array, based on all members of `source` list that are not part of `matchAgainst` list.
+ * 
+ * `R.equals` is used to determine equality.
  */
 export function without<T>(matchAgainst: readonly T[], source: readonly T[]): readonly T[];
 export function without<T>(matchAgainst: readonly T[]): (source: readonly T[]) => readonly T[];
